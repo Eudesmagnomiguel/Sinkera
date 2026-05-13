@@ -41,6 +41,12 @@ export default function Cart() {
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [applyingPromo, setApplyingPromo] = useState(false);
 
+  const [giftCardCode, setGiftCardCode] = useState('');
+  const [giftCardApplied, setGiftCardApplied] = useState(false);
+  const [giftCardDiscount, setGiftCardDiscount] = useState(0);
+  const [giftCardId, setGiftCardId] = useState<string | null>(null);
+  const [applyingGiftCard, setApplyingGiftCard] = useState(false);
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -113,6 +119,35 @@ export default function Cart() {
     setPromoCode('');
   };
 
+  const applyGiftCard = async () => {
+    if (!giftCardCode.trim()) return;
+    setApplyingGiftCard(true);
+    try {
+      const { data: gc, error } = await supabase
+        .from('gift_cards' as any)
+        .select('*')
+        .eq('code', giftCardCode.trim().toUpperCase())
+        .eq('is_active', true)
+        .maybeSingle();
+      if (error) throw error;
+      if (!gc) { toast({ title: 'Gift Card inválido ou inactivo', variant: 'destructive' }); return; }
+      if (gc.expires_at && new Date(gc.expires_at) < new Date()) { toast({ title: 'Gift Card expirado', variant: 'destructive' }); return; }
+      if (gc.remaining_value <= 0) { toast({ title: 'Gift Card sem saldo', variant: 'destructive' }); return; }
+      setGiftCardId(gc.id);
+      setGiftCardDiscount(Math.min(gc.remaining_value, total));
+      setGiftCardApplied(true);
+      toast({ title: `Gift Card aplicado! Saldo: ${gc.remaining_value.toLocaleString('pt-AO', { maximumFractionDigits: 0 })} Kz` });
+    } catch { toast({ title: 'Erro ao validar Gift Card', variant: 'destructive' }); }
+    finally { setApplyingGiftCard(false); }
+  };
+
+  const removeGiftCard = () => {
+    setGiftCardApplied(false);
+    setGiftCardDiscount(0);
+    setGiftCardId(null);
+    setGiftCardCode('');
+  };
+
   const computeDiscount = (): number => {
     if (!promoApplied || !activeCoupon) return 0;
     if (activeCoupon.type === 'percent') return Math.round(total * activeCoupon.value / 100);
@@ -121,7 +156,7 @@ export default function Cart() {
   };
 
   const discount = computeDiscount();
-  const finalTotal = total - discount;
+  const finalTotal = Math.max(0, total - discount - (giftCardApplied ? giftCardDiscount : 0));
   const itemCount = items.reduce((s, i) => s + i.quantity, 0);
 
   return (
@@ -337,6 +372,39 @@ export default function Cart() {
                 )}
               </div>
 
+              {/* Gift Card */}
+              <div className="bg-card border border-border rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Gift className="w-4 h-4 text-emerald-600" />
+                  <h3 className="text-sm font-bold">Gift Card</h3>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={giftCardCode}
+                    onChange={(e) => setGiftCardCode(e.target.value.toUpperCase())}
+                    placeholder="Ex: GC-ABCD1234"
+                    disabled={giftCardApplied}
+                    className="flex-1 text-sm px-3 py-2 rounded-xl border border-border bg-muted/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 disabled:opacity-50"
+                  />
+                  <Button
+                    size="sm"
+                    variant={giftCardApplied ? "outline" : "default"}
+                    onClick={() => { if (giftCardApplied) removeGiftCard(); else applyGiftCard(); }}
+                    disabled={applyingGiftCard}
+                    className="px-4 rounded-xl"
+                  >
+                    {applyingGiftCard ? 'A validar...' : giftCardApplied ? 'Remover' : 'Aplicar'}
+                  </Button>
+                </div>
+                {giftCardApplied && (
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 flex items-center gap-1">
+                    <Gift className="w-3.5 h-3.5" />
+                    Gift Card aplicado: -{giftCardDiscount.toLocaleString('pt-AO', { maximumFractionDigits: 0 })} Kz
+                  </p>
+                )}
+              </div>
+
               {/* Summary card */}
               <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
                 <h2 className="text-lg font-black">Resumo da Encomenda</h2>
@@ -358,6 +426,14 @@ export default function Cart() {
                         <Tag className="w-3.5 h-3.5 text-primary" /> Desconto
                       </span>
                       <span className="font-semibold text-primary">-{discount.toLocaleString('pt-AO', { maximumFractionDigits: 0 })} Kz</span>
+                    </div>
+                  )}
+                  {giftCardApplied && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        <Gift className="w-3.5 h-3.5 text-emerald-600" /> Gift Card
+                      </span>
+                      <span className="font-semibold text-emerald-600">-{giftCardDiscount.toLocaleString('pt-AO', { maximumFractionDigits: 0 })} Kz</span>
                     </div>
                   )}
                 </div>

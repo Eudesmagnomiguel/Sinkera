@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Star, TrendingUp, Flame, Gift } from 'lucide-react';
+import { Plus, Edit, Trash2, Star, TrendingUp, Flame, Gift, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ProductDialog } from './ProductDialog';
 
@@ -99,12 +99,31 @@ export function AdminProducts() {
     }
   };
 
+  const lowStockProducts = products.filter(p => p.stock_quantity <= 10 && p.stock_quantity > 0);
+  const outOfStockProducts = products.filter(p => p.stock_quantity <= 0 || !p.in_stock);
+
   if (loading) {
     return <div>A carregar...</div>;
   }
 
   return (
     <>
+      {(lowStockProducts.length > 0 || outOfStockProducts.length > 0) && (
+        <div className="flex flex-wrap gap-3 mb-4">
+          {outOfStockProducts.length > 0 && (
+            <div className="flex items-center gap-2 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm font-medium px-4 py-2.5 rounded-xl">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              {outOfStockProducts.length} produto{outOfStockProducts.length > 1 ? 's' : ''} esgotado{outOfStockProducts.length > 1 ? 's' : ''}
+            </div>
+          )}
+          {lowStockProducts.length > 0 && (
+            <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 text-sm font-medium px-4 py-2.5 rounded-xl">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              {lowStockProducts.length} produto{lowStockProducts.length > 1 ? 's' : ''} com stock baixo (≤10)
+            </div>
+          )}
+        </div>
+      )}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Produtos</CardTitle>
@@ -136,7 +155,12 @@ export function AdminProducts() {
                   <TableCell>
                     {product.price.toLocaleString('pt-AO', { maximumFractionDigits: 0 })} Kz
                   </TableCell>
-                  <TableCell>{product.stock_quantity}</TableCell>
+                  <TableCell>
+                    <span className={`font-semibold ${product.stock_quantity <= 0 ? 'text-red-600' : product.stock_quantity <= 10 ? 'text-orange-500' : 'text-foreground'}`}>
+                      {product.stock_quantity}
+                      {product.stock_quantity <= 10 && product.stock_quantity > 0 && <AlertTriangle className="w-3.5 h-3.5 inline ml-1" />}
+                    </span>
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       {product.is_featured && <Flame className="w-4 h-4 text-orange-500" />}

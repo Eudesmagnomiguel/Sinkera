@@ -83,10 +83,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
+      const { data: stock } = await supabase
+        .from('products')
+        .select('in_stock, stock_quantity')
+        .eq('id', productId)
+        .single();
+
+      if (!stock?.in_stock || (stock.stock_quantity != null && stock.stock_quantity <= 0)) {
+        toast({ title: "Produto esgotado", description: "Este produto não tem stock disponível", variant: "destructive" });
+        return;
+      }
+
       const existingItem = items.find(item => item.product_id === productId);
+      const newQty = (existingItem?.quantity ?? 0) + quantity;
+
+      if (stock.stock_quantity != null && newQty > stock.stock_quantity) {
+        toast({ title: "Stock insuficiente", description: `Apenas ${stock.stock_quantity} unidades disponíveis`, variant: "destructive" });
+        return;
+      }
 
       if (existingItem) {
-        await updateQuantity(existingItem.id, existingItem.quantity + quantity);
+        await updateQuantity(existingItem.id, newQty);
         return;
       }
 
