@@ -529,7 +529,7 @@ export default function ProductDetails() {
                 className="w-full h-10 text-sm font-semibold rounded-xl bg-[#25D366] hover:bg-[#1ebe5b] text-white active:scale-[0.99] transition-all gap-2 border-0"
               >
                 <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                Comprar via WhatsApp
+                Compra Rápida via WhatsApp
               </Button>
             </div>
 
