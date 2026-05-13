@@ -498,39 +498,43 @@ export default function ProductDetails() {
             </div>
 
             {/* CTA Buttons */}
-            <div className="space-y-3 pt-1">
-              <Button
-                onClick={handleBuyNow}
-                disabled={!inStock}
-                className="w-full h-[52px] text-base font-bold rounded-2xl bg-blue-700 hover:bg-blue-800 text-white shadow-lg hover:shadow-blue-700/25 active:scale-[0.99] transition-all gap-2 border-0"
-              >
-                <Zap className="w-4 h-4" />
-                Comprar Agora
-              </Button>
-              <Button
-                onClick={handleAddToCart}
-                disabled={!inStock}
-                variant="outline"
-                className="w-full h-[52px] text-base font-semibold rounded-2xl border-2 border-gray-200 dark:border-border hover:border-blue-700 hover:text-blue-700 active:scale-[0.99] transition-all gap-2"
-              >
-                {addedToCart ? (
-                  <><Check className="w-4 h-4 text-emerald-500" /> Adicionado ao Carrinho!</>
-                ) : (
-                  <><ShoppingCart className="w-4 h-4" /> Adicionar ao Carrinho</>
-                )}
-              </Button>
+            <div className="space-y-2.5 pt-1">
+              {/* Primary row: Comprar Agora + Adicionar ao Carrinho */}
+              <div className="flex gap-2.5">
+                <Button
+                  onClick={handleBuyNow}
+                  disabled={!inStock}
+                  className="flex-1 h-11 text-sm font-bold rounded-xl bg-blue-700 hover:bg-blue-800 text-white shadow-md hover:shadow-blue-700/25 active:scale-[0.99] transition-all gap-1.5 border-0"
+                >
+                  <Zap className="w-4 h-4 flex-shrink-0" />
+                  Comprar Agora
+                </Button>
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={!inStock}
+                  variant="outline"
+                  className="flex-1 h-11 text-sm font-semibold rounded-xl border-2 border-gray-200 dark:border-border hover:border-blue-700 hover:text-blue-700 active:scale-[0.99] transition-all gap-1.5"
+                >
+                  {addedToCart ? (
+                    <><Check className="w-4 h-4 text-emerald-500 flex-shrink-0" /> Adicionado!</>
+                  ) : (
+                    <><ShoppingCart className="w-4 h-4 flex-shrink-0" /> Carrinho</>
+                  )}
+                </Button>
+              </div>
+              {/* Secondary: WhatsApp full width */}
               <Button
                 onClick={handleWhatsApp}
                 disabled={!inStock}
-                className="w-full h-[52px] text-base font-semibold rounded-2xl bg-[#25D366] hover:bg-[#1ebe5b] text-white active:scale-[0.99] transition-all gap-2 border-0"
+                className="w-full h-10 text-sm font-semibold rounded-xl bg-[#25D366] hover:bg-[#1ebe5b] text-white active:scale-[0.99] transition-all gap-2 border-0"
               >
-                <MessageSquare className="w-4 h-4" />
+                <MessageSquare className="w-4 h-4 flex-shrink-0" />
                 Comprar via WhatsApp
               </Button>
             </div>
 
             {/* Wishlist + Share */}
-            <div className="flex items-center gap-5 pt-0.5">
+            <div className="flex items-center gap-4 pt-0.5">
               <button
                 onClick={handleWishlistToggle}
                 className={`flex items-center gap-1.5 text-sm transition-colors ${
@@ -538,7 +542,7 @@ export default function ProductDetails() {
                 }`}
               >
                 <Heart className={`w-4 h-4 ${isWishlisted ? "fill-red-500" : ""}`} />
-                {isWishlisted ? "Guardado nos Desejos" : "Lista de Desejos"}
+                {isWishlisted ? "Guardado" : "Lista de Desejos"}
               </button>
               <span className="text-gray-200 dark:text-border">|</span>
               <button
