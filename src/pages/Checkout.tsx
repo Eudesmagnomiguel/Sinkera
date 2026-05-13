@@ -77,7 +77,7 @@ export default function Checkout() {
     fullName: '', phone: '', address: '', city: '', province: '', notes: '',
   });
   const [billing, setBilling] = useState({ nif: '', companyName: '', invoiceEmail: '' });
-  const [paymentMethod, setPaymentMethod] = useState('multicaixa');
+  const [paymentMethod, setPaymentMethod] = useState('cash_on_delivery');
 
   const fmtKz = (n: number) => n.toLocaleString('pt-AO', { maximumFractionDigits: 0 }) + ' Kz';
   const itemCount = cartItems.reduce((s, i) => s + i.quantity, 0);

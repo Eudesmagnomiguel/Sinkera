@@ -166,6 +166,12 @@ export default function ProductDetails() {
     toast({ title: "Link copiado!", description: "Partilha com quem precisar." });
   };
 
+  const handleWhatsApp = () => {
+    if (!product) return;
+    const msg = `Olá! Tenho interesse neste produto:\n*${product.name}*\nPreço: ${product.price.toLocaleString('pt-AO')} Kz\n${window.location.href}`;
+    window.open(`https://wa.me/+244900000000?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
   const handleReviewSubmit = async (rating: number, title?: string, comment?: string) => {
     if (editingReview && userReview) {
       await updateReview(userReview.id, rating, title, comment);
@@ -512,6 +518,14 @@ export default function ProductDetails() {
                 ) : (
                   <><ShoppingCart className="w-4 h-4" /> Adicionar ao Carrinho</>
                 )}
+              </Button>
+              <Button
+                onClick={handleWhatsApp}
+                disabled={!inStock}
+                className="w-full h-[52px] text-base font-semibold rounded-2xl bg-[#25D366] hover:bg-[#1ebe5b] text-white active:scale-[0.99] transition-all gap-2 border-0"
+              >
+                <MessageSquare className="w-4 h-4" />
+                Comprar via WhatsApp
               </Button>
             </div>
 

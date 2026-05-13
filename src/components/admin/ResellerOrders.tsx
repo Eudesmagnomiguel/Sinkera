@@ -5,10 +5,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Eye } from 'lucide-react';
+import { Eye, TrendingUp, Wallet, ShoppingBag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { OrderDetails } from './OrderDetails';
 import { useAuth } from '@/hooks/useAuth';
+
+const COMMISSION_RATE = 0.10;
 
 interface Order {
   id: string;
@@ -109,12 +111,53 @@ export function ResellerOrders() {
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
+  const totalSales = orders.reduce((sum, o) => sum + o.total_amount, 0);
+  const totalCommission = totalSales * COMMISSION_RATE;
+  const deliveredCount = orders.filter(o => o.status === 'delivered').length;
+
   if (loading) {
     return <div>A carregar...</div>;
   }
 
   return (
     <>
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+        <Card>
+          <CardContent className="flex items-center gap-3 pt-5">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center">
+              <ShoppingBag className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Total de Pedidos</p>
+              <p className="text-xl font-black">{orders.length}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-3 pt-5">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Volume de Vendas</p>
+              <p className="text-xl font-black">{totalSales.toLocaleString('pt-AO', { maximumFractionDigits: 0 })} Kz</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-amber-200 dark:border-amber-800">
+          <CardContent className="flex items-center gap-3 pt-5">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center">
+              <Wallet className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Comissão a Receber (10%)</p>
+              <p className="text-xl font-black text-amber-600">{totalCommission.toLocaleString('pt-AO', { maximumFractionDigits: 0 })} Kz</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Pedidos dos Meus Produtos</CardTitle>
@@ -138,6 +181,7 @@ export function ResellerOrders() {
                   <TableHead>Cliente</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Total</TableHead>
+                  <TableHead>Comissão (10%)</TableHead>
                   <TableHead>Pagamento</TableHead>
                   <TableHead>Data</TableHead>
                   <TableHead>Estado</TableHead>
@@ -154,6 +198,9 @@ export function ResellerOrders() {
                     <TableCell>{order.profile.email}</TableCell>
                     <TableCell>
                       {order.total_amount.toLocaleString('pt-AO', { maximumFractionDigits: 0 })} Kz
+                    </TableCell>
+                    <TableCell className="font-semibold text-amber-600">
+                      {(order.total_amount * COMMISSION_RATE).toLocaleString('pt-AO', { maximumFractionDigits: 0 })} Kz
                     </TableCell>
                     <TableCell className="capitalize">{order.payment_method}</TableCell>
                     <TableCell>

@@ -15,10 +15,14 @@ interface SaleProduct {
 }
 
 // ── Countdown helpers ──────────────────────────────────────────────────────
-function getMidnightEnd(): Date {
-  const d = new Date();
-  d.setHours(23, 59, 59, 999);
-  return d;
+function getNextSaleEnd(): Date {
+  const now = new Date();
+  const h12 = new Date(now); h12.setHours(12, 0, 0, 0);
+  const h18 = new Date(now); h18.setHours(18, 0, 0, 0);
+  const h12next = new Date(now); h12next.setDate(h12next.getDate() + 1); h12next.setHours(12, 0, 0, 0);
+  if (now < h12) return h12;
+  if (now < h18) return h18;
+  return h12next;
 }
 
 function getTimeLeft(end: Date) {
@@ -50,7 +54,7 @@ export function FlashSaleSection() {
   const { addToCart } = useCart();
   const [products, setProducts] = useState<SaleProduct[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const endRef = useRef<Date>(getMidnightEnd());
+  const endRef = useRef<Date>(getNextSaleEnd());
   const [timeLeft, setTimeLeft] = useState(() => getTimeLeft(endRef.current));
   const [addedId, setAddedId] = useState<string | null>(null);
 
