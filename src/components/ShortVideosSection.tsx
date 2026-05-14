@@ -30,60 +30,6 @@ interface ShortVideo {
   is_active: boolean;
 }
 
-const FALLBACK: ShortVideo[] = [
-  {
-    id: "1",
-    title: "Fones Low Game Edition",
-    price: 95000,
-    original_price: 120000,
-    badge: "50% OFF",
-    video_url: null,
-    thumbnail_url:
-      "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&h=600&fit=crop",
-    product_link: null,
-    position: 1,
-    is_active: true,
-  },
-  {
-    id: "2",
-    title: "Microfones Sem Fio",
-    price: 85000,
-    original_price: null,
-    badge: "Novo",
-    video_url: null,
-    thumbnail_url:
-      "https://images.unsplash.com/photo-1606220588913-b3adf547d474?w=400&h=600&fit=crop",
-    product_link: null,
-    position: 2,
-    is_active: true,
-  },
-  {
-    id: "3",
-    title: "Caneta Stylus Premium",
-    price: 45000,
-    original_price: null,
-    badge: null,
-    video_url: null,
-    thumbnail_url:
-      "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&h=600&fit=crop",
-    product_link: null,
-    position: 3,
-    is_active: true,
-  },
-  {
-    id: "4",
-    title: "Fones Bluetooth Pro",
-    price: 110000,
-    original_price: null,
-    badge: "Vendido",
-    video_url: null,
-    thumbnail_url:
-      "https://images.unsplash.com/photo-1631867675167-90a456a90863?w=400&h=600&fit=crop",
-    product_link: null,
-    position: 4,
-    is_active: true,
-  },
-];
 
 function isYouTube(url: string) {
   return url.includes("youtube.com") || url.includes("youtu.be");
@@ -398,11 +344,13 @@ export const ShortVideosSection = () => {
         .select("*")
         .eq("is_active", true)
         .order("position", { ascending: true });
-      setVideos(data && data.length > 0 ? (data as ShortVideo[]) : FALLBACK);
+      setVideos((data as ShortVideo[]) || []);
       setLoading(false);
     };
     fetch();
   }, []);
+
+  if (!loading && videos.length === 0) return null;
 
   const track = videos.length > 0 ? [...videos, ...videos, ...videos] : [];
   const duration = Math.max(videos.length * 7, 28);

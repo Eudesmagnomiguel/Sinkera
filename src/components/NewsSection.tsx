@@ -15,15 +15,7 @@ export const NewsSection = () => {
     });
   };
 
-  if (loading) {
-    return (
-      <section className="py-10 bg-gray-50 border-t border-gray-200">
-        <div className="container mx-auto px-4">
-          <div className="text-center py-10 text-gray-400">A carregar notícias...</div>
-        </div>
-      </section>
-    );
-  }
+  if (loading || news.length === 0) return null;
 
   return (
     <section className="py-12 bg-gray-50 dark:bg-muted/20 border-t border-gray-100 dark:border-border">
@@ -45,33 +37,7 @@ export const NewsSection = () => {
           )}
         </div>
 
-        {news.length === 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { tag: "Lançamento", title: "Os melhores smartphones de 2025 já chegaram a Angola", date: "Em breve" },
-              { tag: "Guia", title: "Como escolher o laptop ideal para trabalho e estudo", date: "Em breve" },
-              { tag: "Tendência", title: "Smartwatches: o mercado que não para de crescer", date: "Em breve" },
-              { tag: "Promoção", title: "As melhores ofertas de tecnologia para este mês", date: "Em breve" },
-            ].map((item, i) => (
-              <div key={i} className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border overflow-hidden">
-                <div className="h-40 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-muted dark:to-muted/50 flex items-center justify-center">
-                  <span className="text-xs font-bold text-gray-400 tracking-wider uppercase">{item.tag}</span>
-                </div>
-                <div className="p-4 space-y-2">
-                  <p className="text-[10px] text-gray-400 flex items-center gap-1">
-                    <Calendar className="w-3 h-3" /> {item.date}
-                  </p>
-                  <h3 className="text-sm font-semibold text-gray-700 dark:text-foreground line-clamp-2 leading-snug">
-                    {item.title}
-                  </h3>
-                  <span className="text-[11px] font-semibold text-blue-600 flex items-center gap-1">
-                    Em breve <ArrowRight className="w-3 h-3" />
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
+        {news.length > 0 && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {news.slice(0, 4).map((item) => (

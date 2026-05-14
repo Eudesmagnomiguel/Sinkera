@@ -4,7 +4,7 @@ import {
   Monitor, FileText, Tv, Shield, Smartphone, Zap,
   Gamepad2, Heart, ShoppingCart, User, ChevronRight, Wrench,
   Package, Headphones, Search, Star, Flame, Sparkles,
-  X, Home, LogIn, LayoutGrid,
+  X, Home, LogIn, LayoutGrid, Wifi,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -55,7 +55,7 @@ const MAIN_CATEGORIES = [
   {
     id: "acessorios", name: "Acessórios", icon: Headphones,
     color: "bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400",
-    desc: "Fones, capas, casa inteligente",
+    desc: "Fones, capas, carregadores",
     img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=80&h=80&fit=crop",
   },
   {
@@ -65,10 +65,10 @@ const MAIN_CATEGORIES = [
     img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=80&h=80&fit=crop",
   },
   {
-    id: "beleza", name: "Beleza e Cuidado Pessoal", icon: Sparkles,
-    color: "bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400",
-    desc: "Pele, cabelo, maquilhagem",
-    img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=80&h=80&fit=crop",
+    id: "casa-inteligente", name: "Casa Inteligente", icon: Wifi,
+    color: "bg-cyan-100 dark:bg-cyan-900/40 text-cyan-600 dark:text-cyan-400",
+    desc: "Automação, lâmpadas, câmaras",
+    img: "https://images.unsplash.com/photo-1558002038-1055907df827?w=80&h=80&fit=crop",
   },
   {
     id: "escritorio", name: "Escritório e Papelaria", icon: FileText,
@@ -85,8 +85,9 @@ const MAIN_CATEGORIES = [
 ];
 
 const SPECIAL = [
-  { id: "destaques",     name: "Destaques",     icon: Star  },
-  { id: "mais-vendidos", name: "Mais Vendidos", icon: Flame },
+  { id: "destaques",        name: "Destaques",        icon: Star  },
+  { id: "mais-vendidos",    name: "Mais Vendidos",     icon: Flame },
+  { id: "casa-inteligente", name: "Casa Inteligente",  icon: Wifi  },
 ];
 
 export const CategoryDrawer = ({ open, onOpenChange }: CategoryDrawerProps) => {
