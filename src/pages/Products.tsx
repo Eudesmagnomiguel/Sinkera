@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import * as React from "react";
 import { SEO } from "@/components/SEO";
 import { Header } from "@/components/Header";
@@ -21,6 +21,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Grid, List, Loader2, SlidersHorizontal, X, ChevronDown, Package } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import promoBannerBF from "@/assets/promo-black-friday.jpg";
+
+const PAGE_SIZE = 24;
 
 const SORT_OPTIONS = [
   { value: "relevance", label: "Relevância" },
@@ -49,6 +51,8 @@ const Products = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("relevance");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -56,6 +60,21 @@ const Products = () => {
 
   React.useEffect(() => { setSelectedCategory(categoryParam); }, [categoryParam]);
   React.useEffect(() => { if (searchParam) setSearchQuery(searchParam); }, [searchParam]);
+
+  // Reset visible count whenever filters/sort change
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [selectedCategory, searchQuery, sortBy, priceRange, selectedBrands]);
+
+  // Infinite scroll sentinel
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setVisibleCount(c => c + PAGE_SIZE); },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   if (authLoading) {
     return (
@@ -328,7 +347,26 @@ const Products = () => {
 
           {/* Grid */}
           <main id="produtos-grid" className="flex-1 min-w-0">
-            <ProductGrid products={sortedProducts} viewMode={viewMode} />
+            <ProductGrid products={sortedProducts.slice(0, visibleCount)} viewMode={viewMode} />
+
+            {/* Infinite scroll sentinel */}
+            {visibleCount < sortedProducts.length && (
+              <div ref={sentinelRef} className="flex justify-center py-10">
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  A carregar mais produtos…
+                </div>
+              </div>
+            )}
+
+            {/* End of results */}
+            {sortedProducts.length > 0 && visibleCount >= sortedProducts.length && (
+              <div className="flex flex-col items-center gap-1 py-10 text-center">
+                <p className="text-xs text-muted-foreground">
+                  {sortedProducts.length} produto{sortedProducts.length !== 1 ? 's' : ''} encontrado{sortedProducts.length !== 1 ? 's' : ''}
+                </p>
+              </div>
+            )}
           </main>
         </div>
       </div>
