@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTheme } from "next-themes";
-import { ShoppingCart, Heart, User, Menu, Search, ChevronDown, Laptop, Monitor, HardDrive, Smartphone, Tv, Home, Headphones, LogOut, Shield, Phone, MapPin, Tag, Sun, Moon } from "lucide-react";
+import { ShoppingCart, Heart, User, Menu, Search, ChevronDown, Laptop, Monitor, HardDrive, Smartphone, Tv, Home, Headphones, LogOut, Shield, Phone, MapPin, Tag, Sun, Moon, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CategoryDrawer } from "./CategoryDrawer";
 import { Link, useNavigate } from "react-router-dom";
@@ -123,25 +123,6 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
         }
       ]
     },
-    "casa-inteligente": {
-      name: "Casa inteligente",
-      icon: Home,
-      image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=300&fit=crop",
-      columns: [
-        {
-          title: "Segurança",
-          items: ["Câmaras", "Alarmes", "Sensores", "Ver todos os produtos"]
-        },
-        {
-          title: "Automação",
-          items: ["Lâmpadas Inteligentes", "Tomadas Inteligentes", "Termostatos", "Ver todos os produtos"]
-        },
-        {
-          title: "Assistentes",
-          items: ["Amazon Alexa", "Google Home", "Ver todos os produtos"]
-        }
-      ]
-    },
     acessorios: {
       name: "Acessórios",
       icon: Headphones,
@@ -158,6 +139,33 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
         {
           title: "Proteção",
           items: ["Capas", "Películas", "Bolsas", "Ver todos os produtos"]
+        },
+        {
+          title: "Casa Inteligente",
+          items: ["Câmaras e Segurança", "Lâmpadas Inteligentes", "Tomadas Inteligentes", "Assistentes de Voz", "Ver todos os produtos"]
+        }
+      ]
+    },
+    beleza: {
+      name: "Beleza e Cuidado Pessoal",
+      icon: Sparkles,
+      image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&h=300&fit=crop",
+      columns: [
+        {
+          title: "Cuidado da Pele",
+          items: ["Cremes e Hidratantes", "Séruns e Óleos", "Máscaras Faciais", "Protetor Solar", "Ver todos os produtos"]
+        },
+        {
+          title: "Cuidado do Cabelo",
+          items: ["Shampoo e Condicionador", "Óleos Capilares", "Extensões", "Relaxantes", "Ver todos os produtos"]
+        },
+        {
+          title: "Maquilhagem",
+          items: ["Base e Corretor", "Batom e Gloss", "Rímel e Delineador", "Paletes de Sombras", "Ver todos os produtos"]
+        },
+        {
+          title: "Higiene e Bem-estar",
+          items: ["Perfumes", "Desodorizantes", "Aparelhos de Barbear", "Vitaminas e Suplementos", "Ver todos os produtos"]
         }
       ]
     }
@@ -171,33 +179,32 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
     { id: "smartphones", name: "Smartphones e Tablets", hasSubmenu: true },
     { id: "tv-audio", name: "Imagem e Som", hasSubmenu: true },
     { id: "acessorios", name: "Acessórios", hasSubmenu: true },
-    { id: "casa-inteligente", name: "Casa inteligente", hasSubmenu: true },
+    { id: "beleza", name: "Beleza e Cuidado Pessoal", hasSubmenu: true },
   ];
 
   return (
     <>
       <CategoryDrawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen} />
 
-      <header className="sticky top-0 z-50 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+      <header className="sticky top-0 z-50 bg-background shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
 
         {/* Promotional Top Bar */}
-        <div className="bg-[#1a3a8a] text-white text-xs py-1.5 hidden sm:block">
+        <div className="bg-[hsl(221_83%_26%)] text-white/80 text-[11px] py-1.5 hidden sm:block">
           <div className="container mx-auto px-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1.5">
-                <Tag className="w-3 h-3" />
                 Envio grátis em compras acima de 50.000 Kz
               </span>
-              <span className="text-blue-300">|</span>
-              <span className="text-blue-200">Garantia de 12 meses em todos os produtos</span>
+              <span className="text-white/60">|</span>
+              <span className="text-white/60">Garantia de 12 meses em todos os produtos</span>
             </div>
             <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1 text-blue-200">
+              <span className="flex items-center gap-1 text-white/60">
                 <Phone className="w-3 h-3" />
                 +244 900 000 000
               </span>
-              <span className="text-blue-300">|</span>
-              <span className="flex items-center gap-1 text-blue-200">
+              <span className="text-white/60">|</span>
+              <span className="flex items-center gap-1 text-white/60">
                 <MapPin className="w-3 h-3" />
                 Luanda, Angola
               </span>
@@ -206,7 +213,7 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
         </div>
 
         {/* Main Header */}
-        <div className="border-b border-gray-200 bg-white">
+        <div className="border-b border-border bg-background">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center gap-3 md:gap-6">
 
@@ -216,7 +223,7 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
               </Link>
 
               {/* Search Bar */}
-              <div className="flex-1 min-w-0">
+              <div className="hidden sm:block flex-1 min-w-0">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -229,11 +236,11 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Pesquisar produtos, marcas e categorias..."
-                    className="flex-1 min-w-0 px-4 py-2.5 text-sm border border-gray-300 border-r-0 rounded-l-md focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white text-gray-900 placeholder-gray-400"
+                    className="flex-1 min-w-0 px-4 py-2.5 text-sm border border-input border-r-0 rounded-l-xl focus:outline-none focus:border-primary focus:ring-0 bg-background text-foreground placeholder:text-muted-foreground/60"
                   />
                   <button
                     type="submit"
-                    className="flex items-center justify-center px-5 bg-orange-600 hover:bg-orange-700 text-white rounded-r-md transition-colors flex-shrink-0"
+                    className="flex items-center justify-center px-5 bg-[hsl(var(--cta-orange))] hover:bg-[hsl(var(--cta-orange-hover))] text-white rounded-r-xl transition-colors flex-shrink-0"
                   >
                     <Search className="h-4 w-4 sm:h-5 sm:w-5" />
                   </button>
@@ -241,15 +248,15 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-1 sm:gap-2 md:gap-3 flex-shrink-0">
+              <div className="flex items-center gap-1 sm:gap-2 md:gap-3 flex-shrink-0 ml-auto sm:ml-0">
 
                 {/* Account */}
                 {user ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="hidden lg:flex flex-col items-start text-xs text-gray-500 hover:text-blue-700 transition-colors px-2 py-1 rounded hover:bg-gray-50 min-w-0">
+                      <button className="hidden lg:flex flex-col items-start text-xs text-muted-foreground hover:text-primary transition-colors px-2 py-1 rounded hover:bg-muted/50 min-w-0">
                         <span>Olá, {user.email?.split('@')[0]}</span>
-                        <span className="flex items-center gap-1 font-semibold text-gray-800 text-sm">
+                        <span className="flex items-center gap-1 font-semibold text-foreground text-sm">
                           Minha Conta
                           <ChevronDown className="w-3 h-3" />
                         </span>
@@ -285,10 +292,10 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                 ) : (
                   <Link
                     to="/auth"
-                    className="hidden lg:flex flex-col items-start text-xs text-gray-500 hover:text-blue-700 transition-colors px-2 py-1 rounded hover:bg-gray-50"
+                    className="hidden lg:flex flex-col items-start text-xs text-muted-foreground hover:text-primary transition-colors px-2 py-1 rounded hover:bg-muted/50"
                   >
                     <span>Entrar ou</span>
-                    <span className="flex items-center gap-1 font-semibold text-gray-800 text-sm">
+                    <span className="flex items-center gap-1 font-semibold text-foreground text-sm">
                       <User className="w-3.5 h-3.5" />
                       Registar
                     </span>
@@ -298,7 +305,7 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                 {/* Wishlist */}
                 <Link
                   to="/favoritos"
-                  className="hidden sm:flex flex-col items-center text-gray-600 hover:text-blue-700 transition-colors p-2 rounded hover:bg-gray-50"
+                  className="hidden sm:flex flex-col items-center text-muted-foreground hover:text-primary transition-colors p-2 rounded-lg hover:bg-muted/50"
                 >
                   <Heart className="w-5 h-5" />
                   <span className="text-[10px] hidden md:block mt-0.5">Favoritos</span>
@@ -310,7 +317,7 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                 {/* Dark mode toggle */}
                 <button
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300"
+                  className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-muted transition-colors text-muted-foreground"
                   title={theme === "dark" ? "Modo claro" : "Modo noturno"}
                 >
                   {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -319,7 +326,7 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                 {/* Cart */}
                 <Link
                   to="/carrinho"
-                  className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-3 sm:px-4 py-2 rounded-md transition-colors"
+                  className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-3 sm:px-4 py-2 rounded-xl transition-colors"
                 >
                   <div className="relative">
                     <ShoppingCart className="w-5 h-5" />
@@ -330,7 +337,7 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                     )}
                   </div>
                   <div className="hidden lg:block">
-                    <div className="text-[10px] text-blue-200 leading-tight">Carrinho</div>
+                    <div className="text-[10px] text-white/60 leading-tight">Carrinho</div>
                     <div className="text-sm font-semibold leading-tight">
                       {items.length > 0 ? `${items.length} item${items.length > 1 ? 's' : ''}` : 'Vazio'}
                     </div>
@@ -342,14 +349,14 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
         </div>
 
         {/* Category Navigation Bar */}
-        <div className="bg-blue-800 border-b border-blue-900">
+        <div className="bg-[hsl(221_83%_20%)] border-b border-[hsl(221_83%_14%)]">
           <div className="container mx-auto px-4">
             <nav className="flex items-center overflow-x-auto lg:overflow-visible scrollbar-hide">
 
               {/* All Categories Button */}
               <button
                 onClick={() => setIsDrawerOpen(true)}
-                className="flex items-center gap-2 px-4 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold text-sm whitespace-nowrap transition-colors flex-shrink-0"
+                className="flex items-center gap-2 px-4 py-3 bg-[hsl(var(--cta-orange))] hover:bg-[hsl(var(--cta-orange-hover))] text-white font-semibold text-sm whitespace-nowrap transition-colors flex-shrink-0"
               >
                 <Menu className="w-4 h-4" />
                 <span className="hidden md:inline">Todas as Categorias</span>
@@ -377,7 +384,7 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                     {/* Submenu Dropdown */}
                     {category.hasSubmenu && activeSubmenu === category.id && categorySubmenus[category.id as keyof typeof categorySubmenus] && (
                       <div
-                        className={`absolute top-full w-[800px] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.15)] border border-gray-200 rounded-b-lg z-[100] p-8 mt-0 ${
+                        className={`absolute top-full w-[800px] bg-card shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-border rounded-b-lg z-[100] p-8 mt-0 ${
                           index >= 4 ? 'right-0' : 'left-0'
                         }`}
                         onMouseEnter={() => setActiveSubmenu(category.id)}
@@ -385,26 +392,26 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                       >
                         <div className="flex gap-8">
                           {/* Category Header */}
-                          <div className="w-56 border-r border-gray-100 pr-8">
+                          <div className="w-56 border-r border-border/40 pr-8">
                             {(() => {
                               const submenu = categorySubmenus[category.id as keyof typeof categorySubmenus];
                               const Icon = submenu.icon;
                               return (
                                 <>
                                   <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                                      <Icon className="w-5 h-5 text-blue-700" />
+                                    <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center">
+                                      <Icon className="w-5 h-5 text-primary" />
                                     </div>
-                                    <h3 className="text-lg font-bold text-gray-900">{submenu.name}</h3>
+                                    <h3 className="text-lg font-bold text-foreground">{submenu.name}</h3>
                                   </div>
                                   <img
                                     src={submenu.image}
                                     alt={submenu.name}
-                                    className="w-full h-40 object-cover rounded-lg border border-gray-100"
+                                    className="w-full h-40 object-cover rounded-lg border border-border/40"
                                   />
                                   <button
                                     onClick={() => navigate(`/produtos?category=${category.id}`)}
-                                    className="mt-3 w-full text-center text-sm font-semibold text-blue-700 hover:text-blue-900 transition-colors"
+                                    className="mt-3 w-full text-center text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
                                   >
                                     Ver todos →
                                   </button>
@@ -417,7 +424,7 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                           <div className="flex-1 grid grid-cols-3 gap-6">
                             {categorySubmenus[category.id as keyof typeof categorySubmenus].columns.map((column, idx) => (
                               <div key={idx}>
-                                <h4 className="font-bold text-gray-900 mb-3 text-sm border-b border-gray-100 pb-2">
+                                <h4 className="font-bold text-foreground mb-3 text-sm border-b border-border/40 pb-2">
                                   {column.title}
                                 </h4>
                                 <ul className="space-y-1.5">
@@ -427,8 +434,8 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                                         href="#"
                                         className={`text-sm transition-colors block ${
                                           item.startsWith('Ver todos')
-                                            ? 'text-blue-700 font-semibold hover:text-blue-900'
-                                            : 'text-gray-600 hover:text-blue-700'
+                                            ? 'text-primary font-semibold hover:text-primary/80'
+                                            : 'text-muted-foreground hover:text-primary'
                                         }`}
                                       >
                                         {item}
@@ -464,7 +471,7 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200 bg-white shadow-lg">
+          <div className="lg:hidden border-t border-border bg-background shadow-lg">
             <nav className="container mx-auto px-4 py-4">
               <div className="space-y-1">
                 {categories.map((category) => (
@@ -474,7 +481,7 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                       navigate(`/produtos?category=${category.id}`);
                       setIsMenuOpen(false);
                     }}
-                    className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors font-medium"
+                    className="block w-full text-left px-4 py-3 text-sm text-foreground hover:bg-primary/5 hover:text-primary rounded-lg transition-colors font-medium"
                   >
                     {category.name}
                   </button>

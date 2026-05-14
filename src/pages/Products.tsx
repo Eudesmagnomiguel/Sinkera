@@ -7,7 +7,7 @@ import { ProductGrid } from "@/components/ProductGrid";
 import { Footer } from "@/components/Footer";
 import { useProducts } from "@/hooks/useProducts";
 import { useCategories } from "@/hooks/useCategories";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -21,8 +21,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Grid, List, Loader2, SlidersHorizontal, X, ChevronDown, Package } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import promoBannerBF from "@/assets/promo-black-friday.jpg";
-import promoBannerFlash from "@/assets/promo-flash-sale.jpg";
-import promoBannerShip from "@/assets/promo-free-shipping.jpg";
 
 const SORT_OPTIONS = [
   { value: "relevance", label: "Relevância" },
@@ -272,66 +270,50 @@ const Products = () => {
 
         {/* Promos banner — shown only on "promocoes" category */}
         {selectedCategory === "promocoes" && (
-          <div className="mb-8 space-y-3">
+          <div className="mb-8">
             {/* Hero promo banner */}
-            <div className="relative rounded-2xl overflow-hidden shadow-lg group cursor-pointer h-[180px] sm:h-[220px]">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl group cursor-pointer h-[240px] sm:h-[300px]">
+              {/* Imagem */}
               <img
                 src={promoBannerBF}
                 alt="Promoções Sinkera"
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
-              <div className="absolute inset-0 flex flex-col justify-center px-7">
-                <span className="inline-block text-[10px] font-bold uppercase tracking-[0.2em] text-orange-400 mb-2">
+
+              {/* Overlay em camadas */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-black/10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+              {/* Linha decorativa laranja no topo */}
+              <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-orange-500 via-orange-400 to-transparent" />
+
+              {/* Conteúdo */}
+              <div className="absolute inset-0 flex flex-col justify-center px-8 sm:px-10">
+                <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.28em] text-orange-400 mb-3">
+                  <span className="w-4 h-px bg-orange-400" />
                   Campanha Especial
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight drop-shadow-md mb-1">
-                  Descontos até 70%
+                <h2 className="text-3xl sm:text-4xl font-black text-white leading-[1.1] tracking-tight mb-2 drop-shadow-lg">
+                  Descontos<br className="sm:hidden" /> até <span className="text-orange-400">70%</span>
                 </h2>
-                <p className="text-sm text-white/70 mb-4">Stock limitado — aproveita enquanto há</p>
+                <p className="text-[13px] sm:text-sm text-white/60 mb-6 max-w-xs leading-relaxed">
+                  Stock limitado — aproveita enquanto há
+                </p>
                 <div className="inline-flex w-fit">
-                  <span className="bg-orange-500 hover:bg-orange-400 transition-colors text-white text-xs font-bold px-4 py-2 rounded-full cursor-pointer">
-                    Ver todas as ofertas →
-                  </span>
+                  <Link
+                    to="/produtos?category=promocoes"
+                    className="flex items-center gap-2 bg-orange-500 hover:bg-orange-400 transition-colors text-white text-[11px] font-black uppercase tracking-[0.15em] px-5 py-2.5 rounded-sm"
+                  >
+                    Ver todas as ofertas
+                    <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1 duration-200"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </Link>
                 </div>
               </div>
-            </div>
 
-            {/* Two secondary banners */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="relative rounded-2xl overflow-hidden h-[100px] group cursor-pointer shadow">
-                <img
-                  src={promoBannerFlash}
-                  alt="Flash Sale"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/10" />
-                <div className="absolute inset-0 flex items-center px-5 gap-3">
-                  <div className="w-9 h-9 rounded-full bg-orange-500/90 flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-lg font-black">⚡</span>
-                  </div>
-                  <div>
-                    <p className="text-white font-extrabold text-sm leading-tight">Flash Sale</p>
-                    <p className="text-white/70 text-xs">Oferta por tempo limitado</p>
-                  </div>
-                </div>
-              </div>
-              <div className="relative rounded-2xl overflow-hidden h-[100px] group cursor-pointer shadow">
-                <img
-                  src={promoBannerShip}
-                  alt="Envio Grátis"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/10" />
-                <div className="absolute inset-0 flex items-center px-5 gap-3">
-                  <div className="w-9 h-9 rounded-full bg-emerald-500/90 flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-lg">🚚</span>
-                  </div>
-                  <div>
-                    <p className="text-white font-extrabold text-sm leading-tight">Envio Grátis</p>
-                    <p className="text-white/70 text-xs">Acima de 10.000 Kz</p>
-                  </div>
-                </div>
+              {/* Canto inferior direito — badge */}
+              <div className="absolute bottom-5 right-6 text-right hidden sm:block">
+                <p className="text-[9px] font-black uppercase tracking-[0.25em] text-white/25">Sinkera</p>
+                <p className="text-[9px] font-bold text-white/20">Promoções Ativas</p>
               </div>
             </div>
           </div>

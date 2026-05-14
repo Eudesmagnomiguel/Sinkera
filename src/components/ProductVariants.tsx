@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 export interface Variant {
   label: string;
   available: boolean;
+  default?: boolean;
 }
 
 export interface VariantGroup {
@@ -56,11 +57,12 @@ export function ProductVariants({ groups, onSelectionChange }: ProductVariantsPr
   const [selection, setSelection] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    // Initialize with the first available variant in each group
     const initial: Record<string, string> = {};
     groups.forEach((group) => {
+      const preferred = group.variants.find((v) => v.available && v.default);
       const first = group.variants.find((v) => v.available);
-      if (first) initial[group.name] = first.label;
+      const chosen = preferred ?? first;
+      if (chosen) initial[group.name] = chosen.label;
     });
     setSelection(initial);
     onSelectionChange(initial);
@@ -81,10 +83,10 @@ export function ProductVariants({ groups, onSelectionChange }: ProductVariantsPr
         const isColorGroup = group.name.toLowerCase().includes('cor');
         return (
           <div key={group.name}>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2.5">
               <span className="text-sm font-semibold text-foreground">{group.name}</span>
               {selection[group.name] && (
-                <span className="text-sm text-muted-foreground">— {selection[group.name]}</span>
+                <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">{selection[group.name]}</span>
               )}
             </div>
 

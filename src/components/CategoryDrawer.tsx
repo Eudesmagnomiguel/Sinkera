@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
-  Monitor, FileText, Tv, Shield, Smartphone, Zap, Speaker,
+  Monitor, FileText, Tv, Shield, Smartphone, Zap,
   Gamepad2, Heart, ShoppingCart, User, ChevronRight, Wrench,
-  Package, Headphones, Search, Star, Flame, TrendingUp, Percent,
+  Package, Headphones, Search, Star, Flame, Sparkles,
   X, Home, LogIn, LayoutGrid,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -41,12 +41,6 @@ const MAIN_CATEGORIES = [
     img: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=80&h=80&fit=crop",
   },
   {
-    id: "casa-inteligente", name: "Casa Inteligente", icon: Zap,
-    color: "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400",
-    desc: "Automação, câmaras, sensores",
-    img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=80&h=80&fit=crop",
-  },
-  {
     id: "games", name: "Jogos e Consolas", icon: Gamepad2,
     color: "bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400",
     desc: "PlayStation, Xbox, Nintendo",
@@ -61,8 +55,20 @@ const MAIN_CATEGORIES = [
   {
     id: "acessorios", name: "Acessórios", icon: Headphones,
     color: "bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400",
-    desc: "Fones, capas, carregadores",
+    desc: "Fones, capas, casa inteligente",
     img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=80&h=80&fit=crop",
+  },
+  {
+    id: "beleza", name: "Beleza e Cuidado Pessoal", icon: Sparkles,
+    color: "bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400",
+    desc: "Pele, cabelo, maquilhagem",
+    img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=80&h=80&fit=crop",
+  },
+  {
+    id: "beleza", name: "Beleza e Cuidado Pessoal", icon: Sparkles,
+    color: "bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400",
+    desc: "Pele, cabelo, maquilhagem",
+    img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=80&h=80&fit=crop",
   },
   {
     id: "escritorio", name: "Escritório e Papelaria", icon: FileText,
@@ -79,10 +85,8 @@ const MAIN_CATEGORIES = [
 ];
 
 const SPECIAL = [
-  { id: "destaques",    name: "Destaques",     icon: Star,       iconColor: "text-amber-500",  bg: "bg-amber-50  dark:bg-amber-950/40",  border: "border-amber-200  dark:border-amber-800/50" },
-  { id: "mais-vendidos", name: "Mais Vendidos", icon: Flame,      iconColor: "text-red-500",    bg: "bg-red-50    dark:bg-red-950/40",    border: "border-red-200    dark:border-red-800/50" },
-  { id: "tendencias",   name: "Tendências",    icon: TrendingUp, iconColor: "text-blue-500",   bg: "bg-blue-50   dark:bg-blue-950/40",   border: "border-blue-200   dark:border-blue-800/50" },
-  { id: "promocoes",    name: "Promoções",     icon: Percent,    iconColor: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-950/40", border: "border-violet-200 dark:border-violet-800/50" },
+  { id: "destaques",     name: "Destaques",     icon: Star  },
+  { id: "mais-vendidos", name: "Mais Vendidos", icon: Flame },
 ];
 
 export const CategoryDrawer = ({ open, onOpenChange }: CategoryDrawerProps) => {
@@ -139,19 +143,24 @@ export const CategoryDrawer = ({ open, onOpenChange }: CategoryDrawerProps) => {
 
           {/* Special categories */}
           {!search && (
-            <div className="p-4 border-b border-border">
-              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3 px-1">
-                Em Destaque
+            <div className="border-b border-border px-4 pt-4 pb-4">
+              <p className="text-[10px] font-black tracking-[0.22em] uppercase text-muted-foreground/60 px-1 mb-2.5">
+                Colecções
               </p>
-              <div className="grid grid-cols-2 gap-2">
-                {SPECIAL.map(({ id, name, icon: Icon, iconColor, bg, border }) => (
+              <div className="space-y-2">
+                {SPECIAL.map(({ id, name, icon: Icon }) => (
                   <button
                     key={id}
                     onClick={() => go(`/produtos?category=${id}`)}
-                    className={`flex items-center gap-2.5 px-3 py-3 rounded-xl border ${bg} ${border} hover:brightness-95 dark:hover:brightness-110 active:scale-[0.97] transition-all duration-150 text-left`}
+                    style={{ background: "linear-gradient(160deg, hsl(221,90%,9%) 0%, hsl(221,83%,17%) 55%, hsl(221,72%,26%) 100%)" }}
+                    className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-left group border border-white/[0.07] hover:border-white/[0.15] active:scale-[0.98] transition-all duration-100"
                   >
-                    <Icon className={`w-4 h-4 flex-shrink-0 ${iconColor}`} />
-                    <span className="text-sm font-semibold text-foreground leading-tight">{name}</span>
+                    <span className="w-[2px] h-5 rounded-full flex-shrink-0 bg-white/30 group-hover:bg-white/70 transition-colors" />
+                    <Icon className="w-4 h-4 flex-shrink-0 text-white/70 group-hover:text-white transition-colors" />
+                    <span className="flex-1 text-[13px] font-semibold text-white/80 group-hover:text-white tracking-[0.01em] transition-colors">
+                      {name}
+                    </span>
+                    <ChevronRight className="w-3.5 h-3.5 text-white/20 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all duration-150 flex-shrink-0" />
                   </button>
                 ))}
               </div>

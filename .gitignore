@@ -15,6 +15,11 @@ dist-ssr
 # Scripts com credenciais
 scripts/
 
+# Ficheiros SQL (migrações e scripts de base de dados)
+*.sql
+supabase/migrations/
+sinkera-migration-supase/
+
 # Variáveis de ambiente (credenciais)
 .env
 .env.*
