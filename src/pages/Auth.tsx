@@ -140,24 +140,25 @@ export default function Auth() {
       {/* ── Right panel (form) ── */}
       <div className="flex-1 flex flex-col bg-background">
 
-        {/* Mobile logo */}
-        <div className="lg:hidden px-8 pt-8 pb-4 flex items-center justify-between"
-             style={{ borderBottom: '1px solid hsl(var(--border))' }}>
-          <img src={sinkeraLogoWhite} alt="Sinkera" className="h-5 dark:opacity-85 invert dark:invert-0" />
-        </div>
-
         <div className="flex-1 flex flex-col justify-center px-8 sm:px-16 lg:px-20 py-12 max-w-xl w-full mx-auto">
 
-          {/* Heading */}
-          <div className="space-y-1.5 mb-10">
-            <h2 className="text-2xl font-black text-foreground tracking-tight">
-              {mode === 'login' ? 'Bem-vindo de volta' : 'Criar conta gratuita'}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {mode === 'login'
-                ? 'Inicia sessão para continuar as tuas compras.'
-                : 'Regista-te e começa a comprar na Sinkera.'}
-            </p>
+          {/* Logo + Heading */}
+          <div className="space-y-4 mb-10">
+            <img
+              src={sinkeraLogoWhite}
+              alt="Sinkera"
+              className="h-6 w-auto invert dark:invert-0 dark:opacity-85"
+            />
+            <div className="space-y-1.5">
+              <h2 className="text-2xl font-black text-foreground tracking-tight">
+                {mode === 'login' ? 'Bem-vindo de volta' : 'Criar conta gratuita'}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {mode === 'login'
+                  ? 'Inicia sessão para continuar as tuas compras.'
+                  : 'Regista-te e começa a comprar na Sinkera.'}
+              </p>
+            </div>
           </div>
 
           {/* Mode toggle */}
