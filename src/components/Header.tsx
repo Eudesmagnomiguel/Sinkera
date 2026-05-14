@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import { ShoppingCart, Heart, User, Menu, Search, ChevronDown, Laptop, Monitor, HardDrive, Smartphone, Tv, Home, Headphones, LogOut, Shield, Phone, MapPin, Tag, Sun, Moon, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import sinkeraLogo from "@/assets/sinkera-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { NotificationBell } from "./NotificationBell";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +31,47 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
   const { user, signOut, isAdmin } = useAuth();
   const { items } = useCart();
   const { theme, setTheme } = useTheme();
+
+  // ── Autocomplete ──────────────────────────────────────────────────────────
+  const [suggestions, setSuggestions] = useState<{
+    products: { id: string; name: string; image_url: string }[];
+    brands:   { id: string; name: string }[];
+    categories: { id: string; name: string; slug: string }[];
+  }>({ products: [], brands: [], categories: [] });
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchWrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) { setSuggestions({ products: [], brands: [], categories: [] }); return; }
+    const timer = setTimeout(async () => {
+      const like = `%${q}%`;
+      const [p, b, c] = await Promise.all([
+        supabase.from('products').select('id, name, image_url').ilike('name', like).eq('in_stock', true).limit(5),
+        supabase.from('brands').select('id, name').ilike('name', like).limit(3),
+        supabase.from('categories').select('id, name, slug').ilike('name', like).limit(3),
+      ]);
+      setSuggestions({ products: p.data || [], brands: b.data || [], categories: c.data || [] });
+      setShowSuggestions(true);
+    }, 220);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchWrapRef.current && !searchWrapRef.current.contains(e.target as Node))
+        setShowSuggestions(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const hasSuggestions = suggestions.products.length + suggestions.brands.length + suggestions.categories.length > 0;
+
+  const goTo = (path: string) => {
+    setShowSuggestions(false);
+    navigate(path);
+  };
 
   const categorySubmenus = {
     informatica: {
@@ -223,10 +265,11 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
               </Link>
 
               {/* Search Bar */}
-              <div className="hidden sm:block flex-1 min-w-0">
+              <div ref={searchWrapRef} className="hidden sm:block flex-1 min-w-0 relative">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
+                    setShowSuggestions(false);
                     if (searchQuery.trim()) navigate(`/produtos?search=${encodeURIComponent(searchQuery.trim())}`);
                   }}
                   className="flex h-11"
@@ -235,7 +278,9 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => hasSuggestions && setShowSuggestions(true)}
                     placeholder="Pesquisar produtos, marcas e categorias..."
+                    autoComplete="off"
                     className="flex-1 min-w-0 px-4 py-2.5 text-sm border border-input border-r-0 rounded-l-xl focus:outline-none focus:border-primary focus:ring-0 bg-background text-foreground placeholder:text-muted-foreground/60"
                   />
                   <button
@@ -245,6 +290,73 @@ export const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                     <Search className="h-4 w-4 sm:h-5 sm:w-5" />
                   </button>
                 </form>
+
+                {/* Autocomplete dropdown */}
+                {showSuggestions && hasSuggestions && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-2xl z-[200] overflow-hidden">
+
+                    {suggestions.products.length > 0 && (
+                      <div>
+                        <p className="px-4 pt-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Produtos</p>
+                        {suggestions.products.map(p => (
+                          <button
+                            key={p.id}
+                            onMouseDown={() => goTo(`/produto/${p.id}`)}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-muted/50 transition-colors text-left"
+                          >
+                            <div className="w-9 h-9 rounded-lg bg-muted border border-border overflow-hidden flex-shrink-0">
+                              <img src={p.image_url} alt={p.name} className="w-full h-full object-contain p-1" />
+                            </div>
+                            <span className="text-sm text-foreground truncate">{p.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {suggestions.brands.length > 0 && (
+                      <div className="border-t border-border/60">
+                        <p className="px-4 pt-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Marcas</p>
+                        <div className="flex flex-wrap gap-2 px-4 pb-3">
+                          {suggestions.brands.map(b => (
+                            <button
+                              key={b.id}
+                              onMouseDown={() => goTo(`/produtos?search=${encodeURIComponent(b.name)}`)}
+                              className="text-xs font-semibold px-3 py-1.5 rounded-full border border-border hover:border-primary hover:text-primary transition-colors"
+                            >
+                              {b.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {suggestions.categories.length > 0 && (
+                      <div className="border-t border-border/60">
+                        <p className="px-4 pt-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Categorias</p>
+                        <div className="flex flex-wrap gap-2 px-4 pb-3">
+                          {suggestions.categories.map(c => (
+                            <button
+                              key={c.id}
+                              onMouseDown={() => goTo(`/produtos?category=${c.slug || c.id}`)}
+                              className="text-xs font-semibold px-3 py-1.5 rounded-full border border-border hover:border-primary hover:text-primary transition-colors"
+                            >
+                              {c.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="border-t border-border/60 px-4 py-2.5">
+                      <button
+                        onMouseDown={() => { setShowSuggestions(false); if (searchQuery.trim()) navigate(`/produtos?search=${encodeURIComponent(searchQuery.trim())}`); }}
+                        className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        Ver todos os resultados para <strong>"{searchQuery}"</strong>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Actions */}
