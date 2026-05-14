@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, ShoppingCart, Star, Eye, Zap, BarChart2, Check } from "lucide-react";
+import { Heart, Eye, Zap, BarChart2, Check, ShoppingCart } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCompare } from "@/hooks/useCompare";
@@ -18,194 +18,161 @@ interface Product {
   stock_quantity?: number;
 }
 
-interface ProductCardProps {
-  product: Product;
-}
-
-export const ProductCard = ({ product }: ProductCardProps) => {
+export const ProductCard = ({ product }: { product: Product }) => {
   const { addToCart } = useCart();
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const { addToCompare, removeFromCompare, isInCompare } = useCompare();
-  const [addedFeedback, setAddedFeedback] = useState(false);
+  const [added, setAdded] = useState(false);
 
-  const isWishlisted = isInWishlist(product.id);
-  const inCompare = isInCompare(product.id);
+  const wishlisted = isInWishlist(product.id);
+  const compared   = isInCompare(product.id);
 
-  const handleCompareToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (inCompare) {
-      removeFromCompare(product.id);
-    } else {
-      addToCompare(product.id);
-    }
+  const toggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    wishlisted ? removeFromWishlist(product.id) : addToWishlist(product.id);
   };
 
-  const toggleWishlist = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    isWishlisted ? await removeFromWishlist(product.id) : await addToWishlist(product.id);
+  const toggleCompare = (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    compared ? removeFromCompare(product.id) : addToCompare(product.id);
   };
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleAdd = (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!product.in_stock) return;
     addToCart(product.id);
-    setAddedFeedback(true);
-    setTimeout(() => setAddedFeedback(false), 1500);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1800);
   };
 
-  const discount =
-    product.original_price && product.original_price > product.price
-      ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
-      : 0;
-
-  const lowStock = product.stock_quantity != null && product.stock_quantity > 0 && product.stock_quantity <= 5;
+  const lowStock = product.stock_quantity != null
+    && product.stock_quantity > 0
+    && product.stock_quantity <= 5;
 
   return (
-    <article className="group relative flex flex-col bg-card rounded-2xl border border-border hover:border-primary/40 hover:shadow-xl transition-all duration-300 overflow-hidden">
+    <article className="product-card group relative flex flex-col bg-card">
 
-      {/* ── Image area ── */}
+      {/* ── Imagem ── */}
       <Link to={`/produto/${product.id}`} className="relative block overflow-hidden bg-muted/30">
-        <div className="aspect-square p-4 sm:p-5">
+        <div className="aspect-square p-4 sm:p-5 flex items-center justify-center">
           <img
             src={product.image_url}
             alt={product.name}
             loading="lazy"
-            className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.05]"
           />
         </div>
 
-        {/* Hover overlay with quick actions */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+        {/* Overlay de esgotado */}
+        {!product.in_stock && (
+          <div className="absolute inset-0 bg-background/70 flex items-end justify-center pb-4 pointer-events-none">
+            <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground bg-background/90 px-3 py-1 rounded-full border border-border">
+              Esgotado
+            </span>
+          </div>
+        )}
+
+        {/* Acções rápidas — centro, fade no hover */}
+        <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
           <Link
             to={`/produto/${product.id}`}
             onClick={(e) => e.stopPropagation()}
-            className="w-9 h-9 rounded-full bg-background shadow-md flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all -translate-y-2 group-hover:translate-y-0 duration-300"
+            className="w-9 h-9 rounded-full bg-card shadow-md border border-border flex items-center justify-center hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-150"
+            title="Ver produto"
           >
             <Eye className="w-4 h-4" />
           </Link>
           <button
-            onClick={handleAddToCart}
+            onClick={handleAdd}
             disabled={!product.in_stock}
-            className="w-9 h-9 rounded-full bg-background shadow-md flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all -translate-y-2 group-hover:translate-y-0 duration-500 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-9 h-9 rounded-full bg-card shadow-md border border-border flex items-center justify-center hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-150 disabled:opacity-30 disabled:cursor-not-allowed"
+            title="Compra rápida"
           >
             <Zap className="w-4 h-4" />
           </button>
           <button
-            onClick={handleCompareToggle}
-            title={inCompare ? 'Remover da comparação' : 'Comparar'}
-            className={`w-9 h-9 rounded-full shadow-md flex items-center justify-center transition-all -translate-y-2 group-hover:translate-y-0 duration-700 ${
-              inCompare
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-background hover:bg-primary hover:text-primary-foreground'
+            onClick={toggleCompare}
+            title={compared ? "Remover da comparação" : "Comparar"}
+            className={`w-9 h-9 rounded-full shadow-md border flex items-center justify-center transition-all duration-150 ${
+              compared
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card border-border hover:bg-primary hover:text-primary-foreground hover:border-primary"
             }`}
           >
-            {inCompare ? <Check className="w-4 h-4" /> : <BarChart2 className="w-4 h-4" />}
+            {compared ? <Check className="w-4 h-4" /> : <BarChart2 className="w-4 h-4" />}
           </button>
         </div>
 
-        {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-          {discount > 0 && (
-            <span className="bg-red-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm">
-              -{discount}%
-            </span>
-          )}
+        {/* Badges — canto superior esquerdo */}
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-20 pointer-events-none">
           {product.badge && (
-            <span className="bg-violet-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-              {product.badge}
-            </span>
-          )}
-          {!product.in_stock && (
-            <span className="bg-gray-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-              Esgotado
-            </span>
+            <span className="badge-new">{product.badge}</span>
           )}
           {lowStock && product.in_stock && (
-            <span className="bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-              Últimas {product.stock_quantity}!
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500 text-white">
+              Últimas {product.stock_quantity}
             </span>
           )}
         </div>
 
-        {/* Wishlist button */}
+        {/* Favorito — canto superior direito */}
         <button
           onClick={toggleWishlist}
-          className={`absolute top-2 right-2 z-10 w-8 h-8 rounded-full flex items-center justify-center shadow-md border transition-all duration-200 ${
-            isWishlisted
-              ? "bg-red-50 border-red-200 opacity-100"
-              : "bg-background border-border opacity-0 group-hover:opacity-100 hover:border-red-200 hover:bg-red-50"
+          aria-label="Adicionar aos favoritos"
+          className={`absolute top-2 right-2 z-20 w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-200 ${
+            wishlisted
+              ? "bg-red-50 border-red-200 opacity-100 dark:bg-red-950/40 dark:border-red-800"
+              : "bg-card border-border opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:border-red-200"
           }`}
-          aria-label="Favoritos"
         >
-          <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+          <Heart className={`w-3.5 h-3.5 transition-colors ${wishlisted ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
         </button>
       </Link>
 
-      {/* ── Info area ── */}
+      {/* ── Informação ── */}
       <div className="flex flex-col flex-1 p-3 gap-2">
 
-        {/* Rating */}
-        <div className="flex items-center gap-1 h-4">
-          {typeof product.rating === "number" && product.rating > 0 ? (
-            <>
-              <div className="flex">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className={`w-3 h-3 ${i < Math.round(product.rating!) ? "fill-amber-400 text-amber-400" : "fill-muted text-muted"}`} />
-                ))}
-              </div>
-              <span className="text-[11px] text-muted-foreground font-medium">
-                {product.rating.toFixed(1)}
-                {product.reviews_count ? <span> ({product.reviews_count})</span> : null}
-              </span>
-            </>
-          ) : (
-            <span className="text-[11px] text-muted-foreground/50">Sem avaliações</span>
-          )}
-        </div>
-
-        {/* Name */}
+        {/* Nome */}
         <Link to={`/produto/${product.id}`} className="flex-1">
-          <h3 className="text-sm font-semibold text-foreground line-clamp-2 leading-snug hover:text-primary transition-colors min-h-[2.5rem]">
+          <h3 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug hover:text-primary transition-colors duration-150">
             {product.name}
           </h3>
         </Link>
 
-        {/* Price */}
-        <div className="mt-auto space-y-0.5">
+        {/* Preço */}
+        <div className="space-y-0.5 mt-auto">
           {product.original_price && product.original_price > product.price && (
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-muted-foreground line-through">
-                {product.original_price.toLocaleString("pt-AO", { maximumFractionDigits: 0 })} Kz
-              </span>
-              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded-full">
-                Poupa {(product.original_price - product.price).toLocaleString("pt-AO", { maximumFractionDigits: 0 })} Kz
-              </span>
-            </div>
+            <span className="price-original text-xs">
+              {product.original_price.toLocaleString("pt-AO", { maximumFractionDigits: 0 })} Kz
+            </span>
           )}
           <div className="flex items-baseline gap-1">
-            <span className="text-xl font-black text-foreground leading-none">
+            <span className="text-[19px] font-bold text-primary leading-none">
               {product.price.toLocaleString("pt-AO", { maximumFractionDigits: 0 })}
             </span>
-            <span className="text-xs font-semibold text-muted-foreground">Kz</span>
+            <span className="text-[11px] font-medium text-muted-foreground">Kz</span>
           </div>
         </div>
 
-        {/* Add to cart button */}
+        {/* Botão Adicionar */}
         <button
-          onClick={handleAddToCart}
+          onClick={handleAdd}
           disabled={!product.in_stock}
-          className={`w-full h-9 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 transition-all duration-200 mt-1 ${
+          className={`w-full h-9 rounded-md text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-all duration-150 active:scale-[0.98] ${
             !product.in_stock
               ? "bg-muted text-muted-foreground cursor-not-allowed"
-              : addedFeedback
-              ? "bg-emerald-500 text-white scale-[0.98]"
-              : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-md active:scale-[0.97]"
+              : added
+              ? "bg-[hsl(143_70%_33%)] text-white"
+              : "btn-cta"
           }`}
         >
-          <ShoppingCart className="w-3.5 h-3.5" />
-          {!product.in_stock ? "Indisponível" : addedFeedback ? "Adicionado ✓" : "Adicionar ao Carrinho"}
+          {!product.in_stock ? (
+            "Indisponível"
+          ) : added ? (
+            <><Check className="w-3.5 h-3.5" /> Adicionado</>
+          ) : (
+            <><ShoppingCart className="w-3.5 h-3.5" /> Adicionar ao Carrinho</>
+          )}
         </button>
       </div>
     </article>

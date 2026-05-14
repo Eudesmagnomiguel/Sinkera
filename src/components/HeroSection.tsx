@@ -58,14 +58,7 @@ export const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative bg-gradient-to-br from-[#0f2671] via-[#1545b8] to-[#1a3d8f] text-white overflow-hidden">
-      {/* Subtle pattern overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }}
-      />
+    <section className="relative bg-gradient-to-br from-[hsl(221,90%,11%)] via-[hsl(221,83%,22%)] to-[hsl(221,83%,36%)] text-white overflow-hidden">
 
       <div className="container mx-auto px-4 py-10 lg:py-16 relative z-10">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
@@ -73,30 +66,21 @@ export const HeroSection = () => {
           {/* Left: Content */}
           <div ref={contentRef} className="space-y-6">
 
-            {/* Eyebrow */}
-            <div className="hero-eyebrow inline-flex items-center gap-2 bg-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-300 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-200" />
-              </span>
-              Ofertas Especiais · Sinkera 2026
-            </div>
-
             {/* Title */}
             <h1 className="space-y-1">
-              <span className="hero-title block text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-white">
+              <span className="hero-title block text-4xl sm:text-5xl lg:text-[62px] font-black leading-[1.05] tracking-tight text-white">
                 Tecnologia Premium
               </span>
-              <span className="hero-title block text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-orange-400">
+              <span className="hero-title block text-4xl sm:text-5xl lg:text-[62px] font-black leading-[1.05] tracking-tight text-[hsl(var(--cta-orange))]">
                 ao Melhor Preço
               </span>
-              <span className="hero-title block text-xl sm:text-2xl lg:text-3xl font-medium leading-tight text-blue-200 mt-1">
-                Entrega em todo Angola
+              <span className="hero-title block text-xl sm:text-2xl font-normal leading-tight text-white/55 mt-2">
+                Entrega em toda Angola
               </span>
             </h1>
 
             {/* Description */}
-            <p className="hero-desc text-base lg:text-lg text-blue-100 max-w-xl leading-relaxed">
+            <p className="hero-desc text-base lg:text-lg text-white/65 max-w-xl leading-relaxed font-light">
               Smartphones, computadores, TVs e gadgets de marcas originais com garantia
               oficial. Os melhores preços do mercado e suporte dedicado.
             </p>
@@ -105,26 +89,26 @@ export const HeroSection = () => {
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={() => navigate("/produtos")}
-                className="hero-cta inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-bold px-7 py-3.5 rounded-md transition-colors text-base shadow-lg shadow-orange-900/30"
+                className="hero-cta inline-flex items-center gap-2 bg-[hsl(var(--cta-orange))] hover:bg-[hsl(var(--cta-orange-hover))] text-white font-bold px-7 py-3.5 rounded-xl transition-colors text-base shadow-lg shadow-black/30"
               >
                 Ver Todos os Produtos
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button
                 onClick={() => navigate("/produtos?category=promocoes")}
-                className="hero-cta inline-flex items-center gap-2 border-2 border-white/40 hover:border-white text-white font-semibold px-7 py-3.5 rounded-md transition-colors text-base"
+                className="hero-cta inline-flex items-center gap-2 border border-white/30 hover:border-white/60 hover:bg-white/8 text-white font-medium px-7 py-3.5 rounded-xl transition-colors text-base"
               >
                 Ver Promoções
               </button>
             </div>
 
             {/* Trust Signals */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/20">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-2">
               {trustItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.text} className="hero-trust-item flex items-center gap-2 text-sm text-blue-100">
-                    <Icon className="w-4 h-4 text-orange-400 flex-shrink-0" />
+                  <div key={item.text} className="hero-trust-item flex items-center gap-1.5 text-[13px] text-white/60">
+                    <Icon className="w-3.5 h-3.5 text-[hsl(var(--cta-orange))] flex-shrink-0" />
                     <span>{item.text}</span>
                   </div>
                 );
@@ -138,7 +122,7 @@ export const HeroSection = () => {
               <button
                 key={i}
                 onClick={() => navigate("/produtos")}
-                className="hero-product-card group relative bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-xl p-3 sm:p-4 transition-all duration-200 text-left overflow-hidden"
+                className="hero-product-card group relative bg-white/8 hover:bg-white/14 border border-white/12 hover:border-white/28 rounded-2xl p-3 sm:p-4 transition-all duration-300 text-left overflow-hidden"
               >
                 {/* Badge */}
                 <span className={`absolute top-2 left-2 ${product.badgeColor} text-white text-[10px] font-bold px-1.5 py-0.5 rounded z-10`}>
@@ -146,7 +130,7 @@ export const HeroSection = () => {
                 </span>
 
                 {/* Image */}
-                <div className="aspect-square mb-2 overflow-hidden rounded-lg bg-white/5 flex items-center justify-center">
+                <div className="aspect-square mb-2 overflow-hidden rounded-xl bg-white/5 flex items-center justify-center">
                   <img
                     src={product.image}
                     alt={product.label}
@@ -155,10 +139,10 @@ export const HeroSection = () => {
                 </div>
 
                 {/* Label */}
-                <div className="text-white text-xs sm:text-sm font-semibold">
+                <div className="text-white text-xs sm:text-sm font-semibold tracking-tight">
                   {product.label}
                 </div>
-                <div className="text-blue-300 text-xs mt-0.5">
+                <div className="text-white/45 text-xs mt-0.5">
                   Ver produtos →
                 </div>
               </button>
@@ -166,19 +150,6 @@ export const HeroSection = () => {
           </div>
         </div>
 
-        {/* Bottom Stats Bar */}
-        <div className="mt-10 pt-8 border-t border-white/20 grid grid-cols-3 gap-4 max-w-lg">
-          {[
-            { value: "10.000+", label: "Produtos" },
-            { value: "24/7", label: "Suporte" },
-            { value: "48h", label: "Entrega" },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center sm:text-left">
-              <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
-              <div className="text-sm text-blue-300">{stat.label}</div>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   );

@@ -179,31 +179,33 @@
 
   /* === Product Card === */
   .product-card {
-    background: white;
-    border: 1px solid hsl(220 13% 91%);
-    border-radius: 0.625rem;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.75rem;
     overflow: hidden;
-    transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    transition: box-shadow 0.35s cubic-bezier(0.22,1,0.36,1),
+                border-color 0.35s cubic-bezier(0.22,1,0.36,1),
+                transform 0.35s cubic-bezier(0.22,1,0.36,1);
     box-shadow: var(--shadow-card);
   }
 
   .product-card:hover {
     box-shadow: var(--shadow-hover);
-    border-color: hsl(221 83% 75%);
-    transform: translateY(-2px);
+    border-color: hsl(221 83% 72%);
+    transform: translateY(-3px);
   }
 
   /* === Buttons === */
   .btn-cta {
     background: hsl(var(--cta-orange));
     color: white;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.01em;
     transition: background 0.15s ease;
   }
 
-  .btn-cta:hover {
-    background: hsl(var(--cta-orange-hover));
-  }
+  .btn-cta:hover { background: hsl(var(--cta-orange-hover)); }
+  .btn-cta:active { transform: scale(0.98); }
 
   .btn-primary-outline {
     border: 2px solid hsl(var(--primary));
@@ -240,25 +242,25 @@
 
   /* === Category card === */
   .category-card {
-    background: white;
-    border: 1px solid hsl(220 13% 91%);
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
     border-radius: 0.75rem;
     overflow: hidden;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.22,1,0.36,1);
     box-shadow: var(--shadow-card);
   }
 
   .category-card:hover {
-    border-color: hsl(var(--primary));
+    border-color: hsl(var(--primary) / 0.5);
     box-shadow: var(--shadow-hover);
     transform: translateY(-2px);
   }
 
   /* === Trust bar === */
   .trust-bar {
-    background: white;
-    border-top: 1px solid hsl(220 13% 91%);
-    border-bottom: 1px solid hsl(220 13% 91%);
+    background: hsl(var(--card));
+    border-top: 1px solid hsl(var(--border));
+    border-bottom: 1px solid hsl(var(--border));
   }
 
   /* === Legacy classes - kept for backward compatibility === */

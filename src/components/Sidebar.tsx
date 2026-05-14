@@ -1,22 +1,9 @@
 import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useCategories } from "@/hooks/useCategories";
 import { useBrands } from "@/hooks/useBrands";
-import {
-  ChevronDown,
-  ChevronUp,
-  LayoutGrid,
-  Tag,
-  Award,
-  RotateCcw,
-  Flame,
-  Star,
-  TrendingUp,
-  Percent,
-} from "lucide-react";
+import { ChevronDown, ChevronUp, Search, X } from "lucide-react";
 
 interface SidebarProps {
   selectedCategory: string;
@@ -28,38 +15,45 @@ interface SidebarProps {
 }
 
 const SPECIAL_CATEGORIES = [
-  { id: "all", slug: "all", name: "Todos os Produtos", icon: LayoutGrid, count: null },
-  { id: "destaques", slug: "destaques", name: "Destaques", icon: Star, count: null },
-  { id: "mais-vendidos", slug: "mais-vendidos", name: "Mais Vendidos", icon: Flame, count: null },
-  { id: "tendencias", slug: "tendencias", name: "Tendências", icon: TrendingUp, count: null },
-  { id: "promocoes", slug: "promocoes", name: "Promoções", icon: Percent, count: null },
+  { slug: "all",           name: "Todos os Produtos" },
+  { slug: "destaques",     name: "Em Destaque"       },
+  { slug: "mais-vendidos", name: "Mais Vendidos"     },
+  { slug: "tendencias",    name: "Tendências"        },
+  { slug: "promocoes",     name: "Promoções"         },
 ];
 
-function Section({
+const PRICE_PRESETS = [
+  { label: "Até 100k",    min: 0,       max: 100000  },
+  { label: "100k – 500k", min: 100000,  max: 500000  },
+  { label: "500k – 1.5M", min: 500000,  max: 1500000 },
+  { label: "Acima 1.5M",  min: 1500000, max: 5000000 },
+];
+
+function SectionBlock({
   title,
-  icon: Icon,
   children,
   defaultOpen = true,
 }: {
   title: string;
-  icon: React.ElementType;
   children: React.ReactNode;
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border-b border-border last:border-0">
+    <div className="border-t border-gray-100 dark:border-border">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/50 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-3.5 group"
       >
-        <div className="flex items-center gap-2.5">
-          <Icon className="w-4 h-4 text-primary" />
-          <span className="font-semibold text-sm">{title}</span>
-        </div>
-        {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+        <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 group-hover:text-gray-700 dark:group-hover:text-muted-foreground transition-colors">
+          {title}
+        </span>
+        {open
+          ? <ChevronUp className="w-3 h-3 text-gray-300 dark:text-muted-foreground/50" />
+          : <ChevronDown className="w-3 h-3 text-gray-300 dark:text-muted-foreground/50" />
+        }
       </button>
-      {open && <div className="px-4 pb-4">{children}</div>}
+      {open && <div className="pb-4">{children}</div>}
     </div>
   );
 }
@@ -75,6 +69,7 @@ export const Sidebar = ({
   const { categories, loading: categoriesLoading } = useCategories();
   const { brands, loading: brandsLoading } = useBrands();
   const [showAllBrands, setShowAllBrands] = useState(false);
+  const [categorySearch, setCategorySearch] = useState("");
 
   const handleBrandChange = (brandId: string, checked: boolean) => {
     setSelectedBrands(
@@ -96,75 +91,117 @@ export const Sidebar = ({
     setSelectedBrands([]);
   };
 
+  const filteredCategories = categories.filter((c) =>
+    c.name.toLowerCase().includes(categorySearch.toLowerCase())
+  );
   const displayedBrands = showAllBrands ? brands : brands.slice(0, 6);
 
   return (
-    <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
-        <span className="font-bold text-sm">Filtros</span>
-        {hasActiveFilters && (
-          <button
-            onClick={clearAll}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
-          >
-            <RotateCcw className="w-3 h-3" />
-            Limpar tudo
-          </button>
-        )}
-      </div>
+    <div className="bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl overflow-hidden">
 
-      {/* Categories */}
-      <Section title="Categorias" icon={LayoutGrid}>
-        <div className="space-y-0.5 -mx-1">
-          {SPECIAL_CATEGORIES.map(({ slug, name, icon: Icon }) => (
+      {/* ── Cabeçalho + Colecções ── */}
+      <div
+        style={{
+          background: "linear-gradient(160deg, hsl(221,90%,9%) 0%, hsl(221,83%,17%) 55%, hsl(221,72%,26%) 100%)",
+        }}
+      >
+        {/* Cabeçalho */}
+        <div className="flex items-center justify-between px-5 py-4">
+          <span className="text-[11px] font-black tracking-[0.25em] uppercase text-white">
+            Filtros
+          </span>
+          {hasActiveFilters && (
             <button
-              key={slug}
-              onClick={() => setSelectedCategory(slug)}
-              className={`w-full text-left px-3 py-2.5 rounded-xl transition-all duration-150 flex items-center gap-2.5 text-sm ${
-                isActive(slug)
-                  ? "bg-primary text-primary-foreground font-semibold shadow-sm"
-                  : "hover:bg-muted text-foreground"
-              }`}
+              onClick={clearAll}
+              className="flex items-center gap-1 text-[10px] font-semibold text-white/40 hover:text-white transition-colors"
             >
-              <Icon className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="flex-1">{name}</span>
+              <X className="w-3 h-3" />
+              Limpar
             </button>
-          ))}
-
-          {!categoriesLoading && categories.length > 0 && (
-            <div className="pt-2 mt-1 border-t border-border/60">
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-3 pb-1.5">
-                Por Categoria
-              </p>
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.slug)}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all duration-150 flex items-center justify-between gap-2 text-sm ${
-                    isActive(cat.slug)
-                      ? "bg-primary text-primary-foreground font-semibold shadow-sm"
-                      : "hover:bg-muted text-foreground"
-                  }`}
-                >
-                  <span className="flex-1 truncate">{cat.name}</span>
-                  {cat.count != null && (
-                    <span className={`text-[11px] px-1.5 py-0.5 rounded-md font-medium ${
-                      isActive(cat.slug) ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"
-                    }`}>
-                      {cat.count}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
           )}
         </div>
-      </Section>
 
-      {/* Price Range */}
-      <Section title="Faixa de Preço" icon={Tag}>
-        <div className="space-y-4">
+        {/* Colecções */}
+        <div className="mt-1">
+          {SPECIAL_CATEGORIES.map(({ slug, name }, i) => {
+            const active = isActive(slug);
+            return (
+              <button
+                key={slug}
+                onClick={() => setSelectedCategory(slug)}
+                className={`w-full flex items-center justify-between px-5 py-3 group transition-all duration-150 border-t ${
+                  i === 0 ? "border-white/[0.08]" : "border-white/[0.06]"
+                } ${active ? "bg-white/10" : "hover:bg-white/[0.06]"}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className={`w-[2px] rounded-full flex-shrink-0 transition-all duration-200 ${
+                    active ? "h-5 bg-white" : "h-3 bg-white/25 group-hover:bg-white/50"
+                  }`} />
+                  <span className={`text-[13px] leading-tight transition-colors duration-150 ${
+                    active ? "font-bold text-white" : "font-medium text-white/65 group-hover:text-white"
+                  }`}>
+                    {name}
+                  </span>
+                </div>
+                {active && <span className="w-1.5 h-1.5 rounded-full bg-white/60 flex-shrink-0" />}
+              </button>
+            );
+          })}
+          <div className="h-4" />
+        </div>
+      </div>
+
+      {/* ── Categorias reais ── */}
+      {!categoriesLoading && categories.length > 0 && (
+        <SectionBlock title="Categorias">
+          <div className="px-5 pb-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300 dark:text-muted-foreground/50" />
+              <input
+                type="text"
+                placeholder="Pesquisar categoria..."
+                value={categorySearch}
+                onChange={(e) => setCategorySearch(e.target.value)}
+                className="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-gray-100 dark:border-border bg-gray-50 dark:bg-muted/30 text-gray-700 dark:text-foreground placeholder:text-gray-300 dark:placeholder:text-muted-foreground/50 focus:outline-none focus:border-blue-300 dark:focus:border-blue-700 transition-colors"
+              />
+            </div>
+          </div>
+          <div className="space-y-0.5">
+            {filteredCategories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.slug)}
+                className="w-full text-left flex items-start justify-between gap-3 px-5 py-2 group"
+              >
+                <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                  <span className={`mt-[7px] w-1 h-1 rounded-full flex-shrink-0 transition-all duration-150 ${
+                    isActive(cat.slug) ? "bg-blue-700" : "bg-transparent group-hover:bg-gray-300 dark:group-hover:bg-muted-foreground/40"
+                  }`} />
+                  <span className={`text-sm leading-tight truncate transition-colors duration-150 ${
+                    isActive(cat.slug)
+                      ? "font-bold text-blue-700 dark:text-blue-400"
+                      : "font-medium text-gray-600 dark:text-muted-foreground group-hover:text-gray-900 dark:group-hover:text-foreground"
+                  }`}>
+                    {cat.name}
+                  </span>
+                </div>
+                {cat.count != null && (
+                  <span className="text-[10px] font-medium text-gray-300 dark:text-muted-foreground/40 mt-1 flex-shrink-0">
+                    {cat.count}
+                  </span>
+                )}
+              </button>
+            ))}
+            {filteredCategories.length === 0 && (
+              <p className="px-5 py-3 text-xs text-gray-400">Nenhuma categoria encontrada.</p>
+            )}
+          </div>
+        </SectionBlock>
+      )}
+
+      {/* ── Faixa de Preço ── */}
+      <SectionBlock title="Faixa de Preço">
+        <div className="px-5 space-y-4">
           <Slider
             value={priceRange}
             onValueChange={setPriceRange}
@@ -173,65 +210,56 @@ export const Sidebar = ({
             step={10000}
             className="w-full"
           />
-          <div className="flex items-center gap-2">
-            <div className="flex-1 bg-muted rounded-lg px-3 py-2 text-center">
-              <p className="text-[10px] text-muted-foreground mb-0.5">Mín</p>
-              <p className="text-sm font-bold">{(priceRange[0] / 1000).toFixed(0)}k Kz</p>
-            </div>
-            <div className="w-4 h-px bg-border flex-shrink-0" />
-            <div className="flex-1 bg-muted rounded-lg px-3 py-2 text-center">
-              <p className="text-[10px] text-muted-foreground mb-0.5">Máx</p>
-              <p className="text-sm font-bold">
-                {priceRange[1] >= 1000000
-                  ? `${(priceRange[1] / 1000000).toFixed(1)}M`
-                  : `${(priceRange[1] / 1000).toFixed(0)}k`} Kz
-              </p>
-            </div>
+          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-muted-foreground font-medium">
+            <span>{(priceRange[0] / 1000).toFixed(0)}k Kz</span>
+            <span className="text-gray-300 dark:text-border">—</span>
+            <span>
+              {priceRange[1] >= 1000000
+                ? `${(priceRange[1] / 1000000).toFixed(1)}M`
+                : `${(priceRange[1] / 1000).toFixed(0)}k`} Kz
+            </span>
           </div>
-
           <div className="grid grid-cols-2 gap-1.5">
-            {[
-              { label: "Até 100k", min: 0, max: 100000 },
-              { label: "100k–500k", min: 100000, max: 500000 },
-              { label: "500k–1.5M", min: 500000, max: 1500000 },
-              { label: "Acima 1.5M", min: 1500000, max: 5000000 },
-            ].map((r) => (
-              <button
-                key={r.label}
-                onClick={() => setPriceRange([r.min, r.max])}
-                className={`text-xs px-2 py-2 rounded-lg font-medium transition-all ${
-                  priceRange[0] === r.min && priceRange[1] === r.max
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {r.label}
-              </button>
-            ))}
+            {PRICE_PRESETS.map((r) => {
+              const active = priceRange[0] === r.min && priceRange[1] === r.max;
+              return (
+                <button
+                  key={r.label}
+                  onClick={() => setPriceRange([r.min, r.max])}
+                  className={`text-[11px] px-2 py-2 rounded-lg font-semibold transition-all ${
+                    active
+                      ? "bg-blue-700 text-white"
+                      : "bg-gray-50 dark:bg-muted/40 text-gray-500 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-muted hover:text-gray-700 dark:hover:text-foreground"
+                  }`}
+                >
+                  {r.label}
+                </button>
+              );
+            })}
           </div>
         </div>
-      </Section>
+      </SectionBlock>
 
-      {/* Brands */}
+      {/* ── Marcas ── */}
       {!brandsLoading && brands.length > 0 && (
-        <Section title="Marcas" icon={Award} defaultOpen={brands.length <= 8}>
-          <div className="space-y-1">
+        <SectionBlock title="Marcas" defaultOpen={brands.length <= 8}>
+          <div className="px-5 space-y-1">
             {displayedBrands.map((brand) => (
               <label
                 key={brand.id}
-                className="flex items-center gap-2.5 py-1.5 px-1 rounded-lg hover:bg-muted cursor-pointer group transition-colors"
+                className="flex items-center gap-3 py-1.5 cursor-pointer group"
               >
                 <Checkbox
                   id={`brand-${brand.id}`}
                   checked={selectedBrands.includes(brand.id)}
                   onCheckedChange={(c) => handleBrandChange(brand.id, !!c)}
-                  className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  className="data-[state=checked]:bg-blue-700 data-[state=checked]:border-blue-700 border-gray-200 dark:border-border rounded"
                 />
-                <span className="flex-1 text-sm group-hover:text-foreground transition-colors truncate">
+                <span className="flex-1 text-sm text-gray-600 dark:text-muted-foreground group-hover:text-gray-900 dark:group-hover:text-foreground transition-colors truncate">
                   {brand.name}
                 </span>
                 {brand.count != null && (
-                  <span className="text-[11px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md">
+                  <span className="text-[10px] text-gray-300 dark:text-muted-foreground/50 font-medium">
                     {brand.count}
                   </span>
                 )}
@@ -241,16 +269,15 @@ export const Sidebar = ({
           {brands.length > 6 && (
             <button
               onClick={() => setShowAllBrands((v) => !v)}
-              className="mt-2 w-full text-xs text-primary hover:text-primary/80 font-medium flex items-center justify-center gap-1 py-1.5"
+              className="mt-2 mx-5 text-[11px] text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1"
             >
-              {showAllBrands ? (
-                <><ChevronUp className="w-3 h-3" /> Ver menos</>
-              ) : (
-                <><ChevronDown className="w-3 h-3" /> Ver todas ({brands.length})</>
-              )}
+              {showAllBrands
+                ? <><ChevronUp className="w-3 h-3" /> Ver menos</>
+                : <><ChevronDown className="w-3 h-3" /> Ver todas ({brands.length})</>
+              }
             </button>
           )}
-        </Section>
+        </SectionBlock>
       )}
     </div>
   );

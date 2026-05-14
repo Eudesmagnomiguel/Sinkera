@@ -7,8 +7,10 @@ import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import {
   Package, Clock, CheckCircle2, XCircle, Truck, RefreshCw,
-  ChevronRight, ShoppingBag, MapPin, CreditCard, ChevronDown, ChevronUp, Printer, FileText,
+  ShoppingBag, MapPin, CreditCard, ChevronDown, ChevronUp, Printer, FileText, Star,
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import { printFinalInvoice } from '@/lib/invoice';
 
 interface OrderItem {
@@ -25,6 +27,12 @@ interface Order {
   shipping_address: any;
   created_at: string;
   order_items: OrderItem[];
+}
+
+interface OrderReview {
+  order_id: string;
+  rating: number;
+  comment: string | null;
 }
 
 const STATUS_META: Record<string, { label: string; icon: React.ElementType; color: string; bg: string; border: string; step: number }> = {
@@ -53,11 +61,17 @@ const fmtDate = (d: string) => new Date(d).toLocaleDateString('pt-PT', { day: 'n
 
 export default function MyOrders() {
   const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [reviews, setReviews] = useState<OrderReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [reviewOrder, setReviewOrder] = useState<Order | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => { if (user) load(); }, [user]);
 
@@ -69,7 +83,40 @@ export default function MyOrders() {
       .eq('user_id', user?.id)
       .order('created_at', { ascending: false });
     setOrders(data as any || []);
+
+    const { data: rv } = await (supabase as any)
+      .from('order_reviews')
+      .select('order_id, rating, comment')
+      .eq('user_id', user?.id);
+    setReviews(rv || []);
     setLoading(false);
+  };
+
+  const openReview = (order: Order) => {
+    const existing = reviews.find(r => r.order_id === order.id);
+    setReviewRating(existing?.rating ?? 5);
+    setReviewComment(existing?.comment ?? '');
+    setReviewOrder(order);
+  };
+
+  const submitReview = async () => {
+    if (!reviewOrder) return;
+    setSubmittingReview(true);
+    try {
+      await (supabase as any).from('order_reviews').upsert({
+        order_id: reviewOrder.id,
+        user_id: user?.id,
+        rating: reviewRating,
+        comment: reviewComment || null,
+      }, { onConflict: 'order_id,user_id' });
+      toast({ title: 'Avaliação guardada', description: 'Obrigado pelo seu feedback!' });
+      setReviewOrder(null);
+      load();
+    } catch {
+      toast({ title: 'Erro', description: 'Não foi possível guardar a avaliação', variant: 'destructive' });
+    } finally {
+      setSubmittingReview(false);
+    }
   };
 
   const printReceipt = (order: Order) => {
@@ -410,6 +457,20 @@ export default function MyOrders() {
                                 Ver Factura Final
                               </Button>
                             )}
+                            {order.status === 'delivered' && (() => {
+                              const hasReview = reviews.some(r => r.order_id === order.id);
+                              return (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className={`gap-1.5 rounded-xl text-xs ${hasReview ? 'border-amber-300 text-amber-600 dark:border-amber-700 dark:text-amber-400' : 'border-violet-300 text-violet-600 dark:border-violet-700 dark:text-violet-400'}`}
+                                  onClick={() => openReview(order)}
+                                >
+                                  <Star className={`w-3.5 h-3.5 ${hasReview ? 'fill-amber-500' : ''}`} />
+                                  {hasReview ? 'Ver Avaliação' : 'Avaliar Entrega'}
+                                </Button>
+                              );
+                            })()}
                           </div>
                         </div>
                       </div>
@@ -421,6 +482,47 @@ export default function MyOrders() {
           </div>
         )}
       </main>
+
+      {/* Review dialog */}
+      <Dialog open={!!reviewOrder} onOpenChange={(o) => { if (!o) setReviewOrder(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Star className="w-4 h-4 text-amber-500" /> Avaliar Entrega
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-1">
+            <p className="text-sm text-muted-foreground">
+              Como foi a sua experiência com este pedido?
+            </p>
+            {/* Stars */}
+            <div className="flex items-center gap-1.5 justify-center">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button key={n} onClick={() => setReviewRating(n)} className="transition-transform hover:scale-110">
+                  <Star className={`w-8 h-8 ${n <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'}`} />
+                </button>
+              ))}
+            </div>
+            <div className="text-center text-sm font-semibold text-muted-foreground">
+              {['', 'Muito mau', 'Mau', 'Razoável', 'Bom', 'Excelente'][reviewRating]}
+            </div>
+            <textarea
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              placeholder="Comentário opcional..."
+              className="w-full rounded-xl border border-border bg-muted/30 px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+              rows={3}
+            />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setReviewOrder(null)}>Cancelar</Button>
+            <Button onClick={submitReview} disabled={submittingReview} className="gap-1.5">
+              <Star className="w-3.5 h-3.5" />
+              {submittingReview ? 'A guardar...' : 'Guardar Avaliação'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>

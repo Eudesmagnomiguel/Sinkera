@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Upload, Play, Eye, EyeOff, Video, ImageIcon, ExternalLink } from "lucide-react";
+import { Edit, Upload, Play, Eye, EyeOff, Video, ImageIcon, ExternalLink, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ShortVideo {
@@ -22,8 +22,6 @@ interface ShortVideo {
   position: number;
   is_active: boolean;
 }
-
-const SLOTS = [1, 2, 3, 4];
 
 const emptyForm = {
   title: "",
@@ -59,27 +57,36 @@ export function AdminVideos() {
     setLoading(false);
   };
 
-  const getSlotVideo = (slot: number) => videos.find((v) => v.position === slot) ?? null;
+  const nextPosition = videos.length > 0 ? Math.max(...videos.map((v) => v.position)) + 1 : 1;
 
-  const openEdit = (slot: number) => {
-    const v = getSlotVideo(slot);
-    setEditingSlot(slot);
-    setSelected(v);
-    setForm(
-      v
-        ? {
-            title: v.title,
-            price: v.price,
-            original_price: v.original_price != null ? String(v.original_price) : "",
-            badge: v.badge || "",
-            video_url: v.video_url || "",
-            thumbnail_url: v.thumbnail_url,
-            product_link: v.product_link || "",
-            is_active: v.is_active,
-          }
-        : { ...emptyForm }
-    );
+  const openAdd = () => {
+    setEditingSlot(nextPosition);
+    setSelected(null);
+    setForm({ ...emptyForm });
     setOpen(true);
+  };
+
+  const openEdit = (v: ShortVideo) => {
+    setEditingSlot(v.position);
+    setSelected(v);
+    setForm({
+      title: v.title,
+      price: v.price,
+      original_price: v.original_price != null ? String(v.original_price) : "",
+      badge: v.badge || "",
+      video_url: v.video_url || "",
+      thumbnail_url: v.thumbnail_url,
+      product_link: v.product_link || "",
+      is_active: v.is_active,
+    });
+    setOpen(true);
+  };
+
+  const handleDelete = async (v: ShortVideo) => {
+    if (!confirm(`Eliminar "${v.title}"?`)) return;
+    await supabase.from("short_videos").delete().eq("id", v.id);
+    toast({ title: "Vídeo eliminado" });
+    load();
   };
 
   const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,97 +170,88 @@ export function AdminVideos() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Video className="w-5 h-5 text-primary" />
-            Cards de Vídeos da Homepage
-            <Badge variant="outline" className="ml-2">{videos.filter(v => v.is_active).length}/4 ativos</Badge>
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Gerir os 4 cards de vídeo exibidos na página inicial. Cada slot corresponde a uma posição no carousel.
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <Video className="w-5 h-5 text-primary" />
+              <CardTitle>Vídeos em Destaque</CardTitle>
+              <Badge variant="outline">{videos.filter(v => v.is_active).length} ativos</Badge>
+            </div>
+            <Button className="gap-2" onClick={openAdd}>
+              <Plus className="w-4 h-4" /> Adicionar
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            Gere os cards de vídeo / shorts exibidos na página inicial.
           </p>
         </CardHeader>
         <CardContent>
+          {videos.length === 0 && (
+            <p className="text-center text-muted-foreground py-8">Nenhum vídeo. Clica em "Adicionar".</p>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {SLOTS.map((slot) => {
-              const v = getSlotVideo(slot);
-              return (
-                <div key={slot} className="group relative rounded-2xl overflow-hidden border-2 border-dashed border-muted hover:border-primary/50 transition-all duration-200 bg-muted/20">
-                  {v ? (
-                    <>
-                      {/* Thumbnail */}
-                      <div className="relative aspect-[9/16] bg-black">
-                        <img
-                          src={v.thumbnail_url}
-                          alt={v.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                        {v.video_url && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                              <Play className="w-5 h-5 text-white fill-white" />
-                            </div>
-                          </div>
-                        )}
-                        {v.badge && (
-                          <span className={`absolute top-2 right-2 text-white text-xs font-bold px-2 py-0.5 rounded-full ${badgeColor(v.badge)}`}>
-                            {v.badge}
-                          </span>
-                        )}
-                        <div className="absolute bottom-0 left-0 right-0 p-3">
-                          <p className="text-white font-semibold text-sm leading-tight truncate">{v.title}</p>
-                          <p className="text-white/90 text-xs mt-0.5">{v.price.toLocaleString()} Kz</p>
-                        </div>
+            {videos.map((v) => (
+              <div key={v.id} className="group relative rounded-2xl overflow-hidden border-2 border-dashed border-muted hover:border-primary/50 transition-all duration-200 bg-muted/20">
+                {/* Thumbnail */}
+                <div className="relative aspect-[9/16] bg-black">
+                  <img
+                    src={v.thumbnail_url}
+                    alt={v.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  {v.video_url && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                        <Play className="w-5 h-5 text-white fill-white" />
                       </div>
-
-                      {/* Actions bar */}
-                      <div className="p-3 space-y-2 bg-background">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <div className={`w-2 h-2 rounded-full ${v.is_active ? "bg-green-500" : "bg-gray-400"}`} />
-                            <span className="text-xs text-muted-foreground">{v.is_active ? "Ativo" : "Oculto"}</span>
-                          </div>
-                          <div className="flex gap-1">
-                            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => toggleActive(v)}>
-                              {v.is_active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                            </Button>
-                            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(slot)}>
-                              <Edit className="w-3.5 h-3.5" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          {v.video_url ? (
-                            <><Video className="w-3 h-3" /> Com vídeo</>
-                          ) : (
-                            <><ImageIcon className="w-3 h-3" /> Só imagem</>
-                          )}
-                          {v.product_link && <><ExternalLink className="w-3 h-3 ml-1" /> Link</>}
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => openEdit(slot)}
-                      className="w-full aspect-[9/16] flex flex-col items-center justify-center gap-3 p-4 hover:bg-muted/40 transition-colors"
-                    >
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Video className="w-6 h-6 text-primary" />
-                      </div>
-                      <div className="text-center">
-                        <p className="font-medium text-sm">Slot {slot}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">Clica para adicionar</p>
-                      </div>
-                    </button>
+                    </div>
                   )}
-
-                  {/* Slot badge */}
-                  <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                    #{slot}
+                  {v.badge && (
+                    <span className={`absolute top-2 right-2 text-white text-xs font-bold px-2 py-0.5 rounded-full ${badgeColor(v.badge)}`}>
+                      {v.badge}
+                    </span>
+                  )}
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <p className="text-white font-semibold text-sm leading-tight truncate">{v.title}</p>
+                    <p className="text-white/90 text-xs mt-0.5">{v.price.toLocaleString()} Kz</p>
                   </div>
                 </div>
-              );
-            })}
+
+                {/* Actions bar */}
+                <div className="p-3 space-y-2 bg-background">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <div className={`w-2 h-2 rounded-full ${v.is_active ? "bg-green-500" : "bg-gray-400"}`} />
+                      <span className="text-xs text-muted-foreground">{v.is_active ? "Ativo" : "Oculto"}</span>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => toggleActive(v)}>
+                        {v.is_active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                      </Button>
+                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(v)}>
+                        <Edit className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleDelete(v)}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    {v.video_url ? (
+                      <><Video className="w-3 h-3" /> Com vídeo</>
+                    ) : (
+                      <><ImageIcon className="w-3 h-3" /> Só imagem</>
+                    )}
+                    {v.product_link && <><ExternalLink className="w-3 h-3 ml-1" /> Link</>}
+                  </div>
+                </div>
+
+                {/* Position badge */}
+                <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                  #{v.position}
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

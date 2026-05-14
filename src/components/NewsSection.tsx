@@ -25,79 +25,101 @@ export const NewsSection = () => {
     );
   }
 
-  if (news.length === 0) {
-    return null;
-  }
-
   return (
-    <section className="py-10 bg-gray-50 border-t border-gray-200">
+    <section className="py-12 bg-gray-50 dark:bg-muted/20 border-t border-gray-100 dark:border-border">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-7 gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
-              Notícias & <span className="text-blue-700">Tendências</span>
+            <p className="text-[11px] font-bold text-gray-400 tracking-[0.2em] uppercase mb-1.5">Tecnologia & Mercado</p>
+            <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-foreground tracking-tight">
+              Notícias & Tendências
             </h2>
-            <p className="text-sm text-gray-500">
-              Fique por dentro das últimas novidades em tecnologia
-            </p>
           </div>
-          <Link to="/noticias">
-            <Button variant="outline" className="hidden md:flex items-center gap-2">
-              Ver Todas
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </Link>
+          {news.length > 0 && (
+            <Link to="/noticias">
+              <Button variant="outline" className="hidden md:flex items-center gap-2 rounded-xl text-sm">
+                Ver Todas
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
+            </Link>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {news.slice(0, 4).map((item) => (
-            <Link key={item.id} to={`/news/${item.id}`}>
-              <Card className="group cursor-pointer overflow-hidden hover:shadow-md transition-all duration-200 h-full border border-gray-200 hover:border-blue-200">
-                <div className="relative overflow-hidden">
-                  <img
-                    src={item.image_url || "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=250&fit=crop"}
-                    alt={item.title}
-                    className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  {item.product && (
-                    <div className="absolute top-2 left-2">
-                      <span className="bg-blue-700 text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                        {item.product.name}
-                      </span>
-                    </div>
-                  )}
+        {news.length === 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { tag: "Lançamento", title: "Os melhores smartphones de 2025 já chegaram a Angola", date: "Em breve" },
+              { tag: "Guia", title: "Como escolher o laptop ideal para trabalho e estudo", date: "Em breve" },
+              { tag: "Tendência", title: "Smartwatches: o mercado que não para de crescer", date: "Em breve" },
+              { tag: "Promoção", title: "As melhores ofertas de tecnologia para este mês", date: "Em breve" },
+            ].map((item, i) => (
+              <div key={i} className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border overflow-hidden">
+                <div className="h-40 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-muted dark:to-muted/50 flex items-center justify-center">
+                  <span className="text-xs font-bold text-gray-400 tracking-wider uppercase">{item.tag}</span>
                 </div>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mb-2">
-                    <Calendar className="w-3 h-3" />
-                    <span>{formatDate(item.published_at)}</span>
-                  </div>
-                  <h3 className="text-sm font-semibold text-gray-900 mb-1.5 line-clamp-2 group-hover:text-blue-700 transition-colors">
+                <div className="p-4 space-y-2">
+                  <p className="text-[10px] text-gray-400 flex items-center gap-1">
+                    <Calendar className="w-3 h-3" /> {item.date}
+                  </p>
+                  <h3 className="text-sm font-semibold text-gray-700 dark:text-foreground line-clamp-2 leading-snug">
                     {item.title}
                   </h3>
-                  {item.description && (
-                    <p className="text-xs text-gray-500 line-clamp-2 mb-3">
-                      {item.description}
-                    </p>
-                  )}
-                  <span className="text-xs font-semibold text-blue-700 flex items-center gap-1 group-hover:gap-2 transition-all">
-                    Ler mais
-                    <ArrowRight className="w-3 h-3" />
+                  <span className="text-[11px] font-semibold text-blue-600 flex items-center gap-1">
+                    Em breve <ArrowRight className="w-3 h-3" />
                   </span>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-
-        <div className="mt-6 text-center md:hidden">
-          <Link to="/noticias">
-            <Button variant="outline" className="w-full sm:w-auto text-sm border-blue-200 text-blue-700 hover:bg-blue-50">
-              Ver Todas as Notícias
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </Link>
-        </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {news.slice(0, 4).map((item) => (
+                <Link key={item.id} to={`/news/${item.id}`}>
+                  <Card className="group cursor-pointer overflow-hidden hover:shadow-md transition-all duration-200 h-full border border-gray-200 dark:border-border hover:border-blue-200 rounded-2xl">
+                    <div className="relative overflow-hidden">
+                      <img
+                        src={item.image_url || "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=250&fit=crop"}
+                        alt={item.title}
+                        className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      {item.product && (
+                        <div className="absolute top-2 left-2">
+                          <span className="bg-blue-700 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                            {item.product.name}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mb-2">
+                        <Calendar className="w-3 h-3" />
+                        <span>{formatDate(item.published_at)}</span>
+                      </div>
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-foreground mb-1.5 line-clamp-2 group-hover:text-blue-700 transition-colors">
+                        {item.title}
+                      </h3>
+                      {item.description && (
+                        <p className="text-xs text-gray-500 line-clamp-2 mb-3">{item.description}</p>
+                      )}
+                      <span className="text-xs font-semibold text-blue-700 flex items-center gap-1 group-hover:gap-2 transition-all">
+                        Ler mais <ArrowRight className="w-3 h-3" />
+                      </span>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+            <div className="mt-6 text-center md:hidden">
+              <Link to="/noticias">
+                <Button variant="outline" className="w-full sm:w-auto text-sm rounded-xl">
+                  Ver Todas as Notícias
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

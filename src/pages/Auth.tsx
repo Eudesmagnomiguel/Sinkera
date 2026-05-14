@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,28 +14,106 @@ async function getRoleDestination(userId: string): Promise<string> {
   return '/';
 }
 
-const HIGHLIGHTS = [
-  'Produtos originais com garantia oficial',
-  'Entrega em todo o território nacional',
-  'Parceiros em 18 províncias de Angola',
+// ── News ticker (left panel) ─────────────────────────────────────────────────
+const FALLBACK_NEWS = [
+  { title: 'Nova coleção Samsung Galaxy S25 já disponível na Sinkera', category: 'Smartphones',     date: 'Maio 2025' },
+  { title: 'Entrega express em Luanda em menos de 24 horas',           category: 'Logística',       date: 'Maio 2025' },
+  { title: 'Programa de parceiros alargado a 18 províncias',           category: 'Parceiros',       date: 'Abr 2025'  },
+  { title: 'Promoções de até 40% em electrodomésticos este mês',       category: 'Promoções',       date: 'Abr 2025'  },
+  { title: 'Novos produtos de beleza e cuidado pessoal disponíveis',   category: 'Beleza',          date: 'Mar 2025'  },
 ];
 
+interface NewsItem { title: string; category: string; date: string; }
+
+function NewsTicker() {
+  const [items, setItems]     = useState<NewsItem[]>(FALLBACK_NEWS);
+  const [current, setCurrent] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    supabase
+      .from('news_articles' as any)
+      .select('title, category, created_at')
+      .order('created_at', { ascending: false })
+      .limit(6)
+      .then(({ data }: any) => {
+        if (data && data.length > 0) {
+          setItems(data.map((n: any) => ({
+            title:    n.title,
+            category: n.category || 'Novidade',
+            date:     new Date(n.created_at).toLocaleDateString('pt-AO', { month: 'short', year: 'numeric' }),
+          })));
+        }
+      });
+  }, []);
+
+  useEffect(() => {
+    if (items.length <= 1) return;
+    const id = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => { setCurrent(c => (c + 1) % items.length); setVisible(true); }, 350);
+    }, 4500);
+    return () => clearInterval(id);
+  }, [items.length]);
+
+  const item = items[current];
+
+  return (
+    <div className="space-y-4">
+      <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-white/30">
+        Últimas Notícias
+      </p>
+
+      {/* Animated item */}
+      <div style={{ minHeight: 80, transition: 'opacity 0.35s ease', opacity: visible ? 1 : 0 }}>
+        <p className="text-[10px] font-black tracking-[0.18em] uppercase mb-2"
+           style={{ color: 'hsl(22 100% 55%)' }}>
+          {item.category}
+        </p>
+        <p className="text-white/80 text-sm font-semibold leading-snug">
+          {item.title}
+        </p>
+        <p className="text-white/25 text-[11px] mt-2 tabular-nums">{item.date}</p>
+      </div>
+
+      {/* Progress dots */}
+      <div className="flex gap-1.5 items-center">
+        {items.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => {
+              setVisible(false);
+              setTimeout(() => { setCurrent(i); setVisible(true); }, 200);
+            }}
+            className="rounded-full transition-all duration-300 focus:outline-none"
+            style={{
+              width:      i === current ? 18 : 5,
+              height:     5,
+              background: i === current ? 'hsl(22 100% 46%)' : 'rgba(255,255,255,0.18)',
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 export default function Auth() {
   const { user, isAdmin, isReseller, signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
-  const [mode, setMode]             = useState<'login' | 'signup'>('login');
-  const [loading, setLoading]       = useState(false);
-  const [showPass, setShowPass]     = useState(false);
-  const [showPass2, setShowPass2]   = useState(false);
-  const [error, setError]           = useState('');
+  const [mode, setMode]               = useState<'login' | 'signup'>('login');
+  const [loading, setLoading]         = useState(false);
+  const [showPass, setShowPass]       = useState(false);
+  const [showPass2, setShowPass2]     = useState(false);
+  const [error, setError]             = useState('');
 
-  const [email, setEmail]           = useState('');
-  const [password, setPassword]     = useState('');
-  const [fullName, setFullName]     = useState('');
+  const [email, setEmail]             = useState('');
+  const [password, setPassword]       = useState('');
+  const [fullName, setFullName]       = useState('');
   const [confirmPass, setConfirmPass] = useState('');
 
-  // Redirect if already logged in — respect role
   if (user) {
     if (isAdmin || isReseller) return <Navigate to="/admin" replace />;
     return <Navigate to="/" replace />;
@@ -83,7 +161,7 @@ export default function Auth() {
       <div className="hidden lg:flex lg:w-[55%] relative flex-col"
            style={{ background: 'hsl(222 47% 5%)' }}>
 
-        {/* Background image overlay */}
+        {/* Background image */}
         <div className="absolute inset-0 opacity-20"
              style={{
                backgroundImage: 'url(https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=1400&q=80&fit=crop)',
@@ -93,7 +171,7 @@ export default function Auth() {
         <div className="absolute inset-0"
              style={{ background: 'linear-gradient(135deg, hsl(222 47% 5%) 0%, hsl(221 83% 12% / 0.85) 100%)' }} />
 
-        {/* Decorative grid lines */}
+        {/* Grid texture */}
         <div className="absolute inset-0 opacity-[0.04]"
              style={{
                backgroundImage: 'linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)',
@@ -101,37 +179,33 @@ export default function Auth() {
              }} />
 
         <div className="relative z-10 flex flex-col h-full px-14 py-12">
-          {/* Logo */}
-          <img src={sinkeraLogoWhite} alt="Sinkera" className="h-5 w-auto opacity-85" />
 
           {/* Main content */}
-          <div className="flex-1 flex flex-col justify-center max-w-md">
-            <div className="space-y-6">
-              <div className="space-y-3">
-                <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/35">
-                  Nova Era Digital
-                </p>
-                <h1 className="text-4xl font-black text-white leading-[1.08] tracking-tight">
-                  A melhor loja<br />tech de Angola.
-                </h1>
-              </div>
-              <p className="text-white/45 text-sm leading-relaxed max-w-xs">
-                Smartphones, laptops, electrodomésticos e muito mais — com entrega rápida em todo o país.
+          <div className="flex-1 flex flex-col justify-center max-w-md space-y-10">
+
+            {/* Brand headline */}
+            <div className="space-y-4">
+              <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/35">
+                Nova Era Digital
               </p>
-              <div className="space-y-2.5 pt-2">
-                {HIGHLIGHTS.map((h) => (
-                  <div key={h} className="flex items-center gap-3">
-                    <div className="w-1 h-1 rounded-full flex-shrink-0"
-                         style={{ background: 'hsl(22 100% 46%)' }} />
-                    <p className="text-xs text-white/50">{h}</p>
-                  </div>
-                ))}
-              </div>
+              <h1 className="text-4xl font-black text-white leading-[1.08] tracking-tight">
+                A melhor loja<br />tech de Angola.
+              </h1>
+              <p className="text-white/40 text-sm leading-relaxed max-w-xs">
+                Smartphones, laptops, electrodomésticos e muito mais — entrega rápida em todo o país.
+              </p>
             </div>
+
+            {/* Thin divider */}
+            <div className="h-px w-12" style={{ background: 'rgba(255,255,255,0.12)' }} />
+
+            {/* News ticker */}
+            <NewsTicker />
+
           </div>
 
           {/* Bottom tagline */}
-          <p className="text-[10px] text-white/20 tracking-widest uppercase">
+          <p className="text-[10px] text-white/18 tracking-widest uppercase">
             Sinkera © 2025 · Luanda, Angola
           </p>
         </div>
@@ -139,7 +213,6 @@ export default function Auth() {
 
       {/* ── Right panel (form) ── */}
       <div className="flex-1 flex flex-col bg-background">
-
         <div className="flex-1 flex flex-col justify-center px-8 sm:px-16 lg:px-20 py-12 max-w-xl w-full mx-auto">
 
           {/* Logo + Heading */}
@@ -162,7 +235,7 @@ export default function Auth() {
           </div>
 
           {/* Mode toggle */}
-          <div className="flex gap-0 mb-8 border border-border rounded-xl overflow-hidden p-1 bg-muted/40">
+          <div className="flex mb-8 border border-border rounded-xl overflow-hidden p-1 bg-muted/40">
             {(['login', 'signup'] as const).map((m) => (
               <button
                 key={m}
@@ -170,8 +243,8 @@ export default function Auth() {
                 className="flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
                 style={{
                   background: mode === m ? 'hsl(var(--background))' : 'transparent',
-                  color: mode === m ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))',
-                  boxShadow: mode === m ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                  color:      mode === m ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))',
+                  boxShadow:  mode === m ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                 }}
               >
                 {m === 'login' ? 'Entrar' : 'Registar'}
@@ -235,11 +308,8 @@ export default function Auth() {
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                   className="h-12 rounded-xl border-border/80 focus:border-primary bg-background pr-11"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPass(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
+                <button type="button" onClick={() => setShowPass(v => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
@@ -259,11 +329,8 @@ export default function Auth() {
                     required
                     className="h-12 rounded-xl border-border/80 focus:border-primary bg-background pr-11"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPass2(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
+                  <button type="button" onClick={() => setShowPass2(v => !v)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                     {showPass2 ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
@@ -278,21 +345,19 @@ export default function Auth() {
               onMouseEnter={e => { if (!loading) e.currentTarget.style.background = 'hsl(22 100% 40%)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'hsl(22 100% 46%)'; }}
             >
-              {loading ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> A processar...</>
-              ) : (
-                <>{mode === 'login' ? 'Entrar' : 'Criar Conta'} <ArrowRight className="w-4 h-4" /></>
-              )}
+              {loading
+                ? <><Loader2 className="w-4 h-4 animate-spin" /> A processar...</>
+                : <>{mode === 'login' ? 'Entrar' : 'Criar Conta'} <ArrowRight className="w-4 h-4" /></>
+              }
             </button>
           </form>
 
-          {/* Footer links */}
+          {/* Footer */}
           <div className="mt-8 pt-6 border-t border-border text-center text-xs text-muted-foreground">
             Ao continuar, aceitas os nossos{' '}
             <a href="/termos" className="underline hover:text-foreground transition-colors">Termos</a>
             {' '}e{' '}
-            <a href="/privacidade" className="underline hover:text-foreground transition-colors">Política de Privacidade</a>
-            .
+            <a href="/privacidade" className="underline hover:text-foreground transition-colors">Política de Privacidade</a>.
           </div>
         </div>
       </div>

@@ -16,11 +16,10 @@ interface PromoBanner {
   position: number;
 }
 
-// Fallback while DB not seeded
 const FALLBACK: PromoBanner[] = [
-  { id: '1', title: 'Envio Grátis',     description: 'Em compras acima de 50.000 Kz',     badge: 'Sem Limite',     badge_color: '#2563EB', bg_color: '#1B4FD8', image_url: null, cta_label: 'Comprar Agora',     cta_link: '/produtos', position: 0 },
-  { id: '2', title: 'Até 50% OFF',      description: 'Em electrodomésticos e smartphones', badge: 'Tempo Limitado', badge_color: '#DC2626', bg_color: '#111827', image_url: null, cta_label: 'Ver Promoções',     cta_link: '/produtos', position: 1 },
-  { id: '3', title: 'Oferta Relâmpago', description: 'Desconto de 30% — válido hoje',       badge: 'Hoje Só',        badge_color: '#EA580C', bg_color: '#431407', image_url: null, cta_label: 'Aproveitar Oferta', cta_link: '/produtos', position: 2 },
+  { id: '1', title: 'Envio Grátis',     description: 'Em compras acima de 50.000 Kz',     badge: 'Sem Limite',     badge_color: '#2563EB', bg_color: '#0d1117', image_url: null, cta_label: 'Comprar Agora',     cta_link: '/produtos', position: 0 },
+  { id: '2', title: 'Até 50% OFF',      description: 'Em electrodomésticos e smartphones', badge: 'Tempo Limitado', badge_color: '#DC2626', bg_color: '#0d1117', image_url: null, cta_label: 'Ver Promoções',     cta_link: '/produtos', position: 1 },
+  { id: '3', title: 'Oferta Relâmpago', description: 'Desconto de 30% — válido hoje',       badge: 'Hoje Só',        badge_color: '#EA580C', bg_color: '#0d1117', image_url: null, cta_label: 'Aproveitar Oferta', cta_link: '/produtos', position: 2 },
 ];
 
 export const PromotionsSection = () => {
@@ -46,9 +45,9 @@ export const PromotionsSection = () => {
   if (loading) {
     return (
       <section className="py-10">
-        <div className="h-8 w-56 bg-muted rounded-lg animate-pulse mb-6" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map(i => <div key={i} className="aspect-[4/3] rounded-xl bg-muted animate-pulse" />)}
+        <div className="h-8 w-48 bg-muted rounded animate-pulse mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {[1, 2, 3].map(i => <div key={i} className="aspect-[3/4] bg-muted animate-pulse" />)}
         </div>
       </section>
     );
@@ -56,66 +55,95 @@ export const PromotionsSection = () => {
 
   return (
     <section className="py-10">
-      <div className="flex items-center justify-between mb-6">
+
+      {/* Cabeçalho */}
+      <div className="flex items-end justify-between mb-8 gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-foreground">
-            Promoções <span className="text-red-600">Ativas</span>
+          <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-muted-foreground mb-1.5">
+            Ofertas
+          </p>
+          <h2 className="text-2xl sm:text-3xl font-black text-foreground leading-tight tracking-tight">
+            Promoções Ativas
           </h2>
-          <p className="text-gray-500 dark:text-muted-foreground text-sm mt-1">Ofertas por tempo limitado — não perca</p>
         </div>
+        <Link
+          to="/produtos"
+          className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap group"
+        >
+          Ver todas
+          <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+        </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {banners.map((promo) => (
+      {/* Grid de cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {banners.map((promo, idx) => (
           <Link
             key={promo.id}
             to={promo.cta_link || '/produtos'}
-            className="relative overflow-hidden rounded-xl group cursor-pointer shadow-sm hover:shadow-lg transition-shadow duration-300 block"
+            className="relative overflow-hidden group block"
+            style={{ background: "#0d1117" }}
           >
-            <div className="aspect-[4/3] relative overflow-hidden">
-              {/* Background colour */}
-              <div className="absolute inset-0" style={{ backgroundColor: promo.bg_color }} />
+            {/* Imagem de fundo */}
+            {promo.image_url && (
+              <img
+                src={promo.image_url}
+                alt={promo.title}
+                className="absolute inset-0 w-full h-full object-cover opacity-40 transition-all duration-700 group-hover:opacity-50 group-hover:scale-[1.03]"
+              />
+            )}
 
-              {/* Background image if set */}
-              {promo.image_url && (
-                <img
-                  src={promo.image_url}
-                  alt={promo.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+            {/* Overlay gradiente da plataforma */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: "linear-gradient(160deg, hsl(221,90%,9%) 0%, hsl(221,83%,14%)aa 50%, transparent 100%)",
+              }}
+            />
+
+            {/* Borda fina no hover */}
+            <div className="absolute inset-0 border border-white/0 group-hover:border-white/10 transition-all duration-300" />
+
+            {/* Linha superior decorativa */}
+            <div
+              className="absolute top-0 left-0 right-0 h-[1px]"
+              style={{ background: "linear-gradient(90deg, hsl(var(--cta-orange)), transparent)" }}
+            />
+
+            {/* Conteúdo */}
+            <div className="relative flex flex-col p-6 min-h-[210px]">
+
+              {/* Topo: badge + número */}
+              <div className="flex items-start justify-between mb-4">
+                {promo.badge ? (
+                  <span
+                    className="text-[9px] font-black tracking-[0.22em] uppercase px-2.5 py-1 text-white"
+                    style={{ backgroundColor: promo.badge_color }}
+                  >
+                    {promo.badge}
+                  </span>
+                ) : <span />}
+                <span className="text-[11px] font-mono text-white/15">
+                  {String(idx + 1).padStart(2, "0")}
+                </span>
+              </div>
+
+              {/* Título + descrição — logo após o badge */}
+              <h3 className="text-white text-xl font-black leading-tight tracking-tight mb-1.5">
+                {promo.title}
+              </h3>
+              {promo.description && (
+                <p className="text-white/50 text-[13px] leading-relaxed mb-0">
+                  {promo.description}
+                </p>
               )}
 
-              {/* Gradient overlay for readability */}
-              <div
-                className="absolute inset-0"
-                style={{ background: `linear-gradient(to right, ${promo.bg_color}f0 0%, ${promo.bg_color}99 55%, transparent 100%)` }}
-              />
-
-              {/* Content */}
-              <div className="absolute inset-0 flex flex-col justify-between p-5">
-                <div>
-                  {promo.badge && (
-                    <span
-                      className="text-white text-xs font-bold px-2.5 py-1 rounded uppercase tracking-wider"
-                      style={{ backgroundColor: promo.badge_color }}
-                    >
-                      {promo.badge}
-                    </span>
-                  )}
-                </div>
-
-                <div>
-                  <h3 className="text-white text-xl sm:text-2xl font-bold leading-tight mb-1 drop-shadow">
-                    {promo.title}
-                  </h3>
-                  {promo.description && (
-                    <p className="text-white/85 text-sm mb-4 drop-shadow">{promo.description}</p>
-                  )}
-                  <button className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold text-sm px-4 py-2.5 rounded-md hover:bg-gray-100 transition-colors group/btn shadow-md">
-                    {promo.cta_label || 'Ver Promoções'}
-                    <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-                  </button>
-                </div>
+              {/* CTA empurrado para o fundo */}
+              <div className="mt-auto pt-5">
+                <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.15em] uppercase text-white/60 group-hover:text-white transition-colors duration-200">
+                  {promo.cta_label || 'Ver Promoções'}
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1 duration-200" />
+                </span>
               </div>
             </div>
           </Link>

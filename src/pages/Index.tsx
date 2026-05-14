@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Sparkles, TrendingUp, Tag, Flame, ArrowRight } from "lucide-react";
 import { SEO } from "@/components/SEO";
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
@@ -6,18 +8,55 @@ import { CategoriesSection } from "@/components/CategoriesSection";
 import { ProductSection } from "@/components/ProductSection";
 import { PromoBanner } from "@/components/PromoBanner";
 import { PromotionsSection } from "@/components/PromotionsSection";
-import { GiftCardSection } from "@/components/GiftCardSection";
 import { ShortVideosSection } from "@/components/ShortVideosSection";
 import { BrandsSection } from "@/components/BrandsSection";
 import { FeaturesBar } from "@/components/FeaturesBar";
 import { NewsSection } from "@/components/NewsSection";
-import { PartnerFormSection } from "@/components/PartnerFormSection";
 import { Footer } from "@/components/Footer";
 import { useProducts } from "@/hooks/useProducts";
 import { HighlightSplit } from "@/components/HighlightSplit";
 import { MainBanner } from "@/components/MainBanner";
 import { FlashSaleSection } from "@/components/FlashSaleSection";
 import { RecentlyViewedSection } from "@/components/RecentlyViewedSection";
+
+const PartnerBanner = () => {
+  const navigate = useNavigate();
+  return (
+    <section className="bg-gradient-to-r from-[hsl(221,90%,11%)] via-[hsl(221,83%,18%)] to-[hsl(221,83%,28%)] text-white">
+      <div className="container mx-auto px-4 py-14">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-10">
+          <div className="space-y-4 max-w-lg">
+            <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40">Programa de Parceria</p>
+            <h2 className="text-3xl md:text-4xl font-black leading-[1.1] tracking-tight">
+              Faz parte da rede<br />
+              <span className="text-[hsl(var(--cta-orange))]">Sinkera</span>
+            </h2>
+            <p className="text-white/55 text-sm leading-relaxed">
+              Revendedor, parceiro estratégico ou prestador de serviço — temos uma oportunidade para o teu perfil em todas as províncias de Angola.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8 flex-shrink-0">
+            <ul className="space-y-2.5">
+              {["Descontos exclusivos até 30%", "Suporte e formação dedicados", "Cobertura em 18 províncias"].map((item) => (
+                <li key={item} className="flex items-center gap-2.5 text-sm text-white/65">
+                  <span className="w-1 h-1 rounded-full bg-[hsl(var(--cta-orange))] flex-shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={() => navigate("/parceiros")}
+              className="h-12 px-8 bg-[hsl(var(--cta-orange))] hover:bg-[hsl(var(--cta-orange-hover))] text-white font-semibold tracking-[0.12em] uppercase text-[12px] rounded-xl transition-colors flex items-center gap-2 whitespace-nowrap"
+            >
+              Candidatar-se
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,7 +74,7 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center text-gray-500">A carregar produtos...</div>
@@ -45,7 +84,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <SEO />
       <Header
         searchQuery={searchQuery}
@@ -71,9 +110,9 @@ const Index = () => {
 
         {/* Produtos em Destaque */}
         <ProductSection
-          eyebrow="Curadoria Sinkera"
-          title="Produtos em destaque"
-          description="Selecionados pela nossa equipa para entregar a melhor relação design, performance e preço."
+          eyebrow="Em Destaque"
+          icon={Sparkles}
+          title="Destaques"
           products={destaques}
           viewAllLink="/produtos"
         />
@@ -91,10 +130,10 @@ const Index = () => {
 
         {/* Best Selling */}
         {bestSelling.length > 0 && (
-          <ProductSection 
-            eyebrow="Top sellers"
-            title="Os mais escolhidos da semana"
-            description="O que os clientes Sinkera estão levando agora — atualizado em tempo real."
+          <ProductSection
+            eyebrow="Mais Vendidos"
+            icon={TrendingUp}
+            title="Os mais escolhidos"
             products={bestSelling}
             viewAllLink="/produtos"
           />
@@ -103,12 +142,12 @@ const Index = () => {
         {/* Brands */}
         <BrandsSection />
 
-        {/* Ofertas Especiais */}
+        {/* Promoções */}
         {ofertas.length > 0 && (
-          <ProductSection 
-            eyebrow="Promoções relâmpago"
-            title="Ofertas especiais — por tempo limitado"
-            description="Descontos reais em produtos selecionados. Stock limitado, leva enquanto há."
+          <ProductSection
+            eyebrow="Promoções"
+            icon={Tag}
+            title="Ofertas por tempo limitado"
             products={ofertas}
             viewAllLink="/produtos?category=promocoes"
           />
@@ -126,19 +165,16 @@ const Index = () => {
           accent="violet"
         />
 
-        {/* Notícias & Tendências */}
+        {/* Tendências */}
         {trending.length > 0 && (
-          <ProductSection 
-            eyebrow="Trending agora"
+          <ProductSection
+            eyebrow="Tendências"
+            icon={Flame}
             title="O que está em alta"
-            description="Lançamentos, gadgets virais e tudo o que o mundo tech está a falar."
             products={trending}
             viewAllLink="/produtos"
           />
         )}
-
-        {/* Gift Card Section */}
-        <GiftCardSection />
 
         {/* Short Videos Section */}
         <ShortVideosSection />
@@ -158,13 +194,11 @@ const Index = () => {
         <RecentlyViewedSection />
       </main>
 
+      {/* Partner Banner */}
+      <PartnerBanner />
+
       {/* News Section */}
       <NewsSection />
-
-      {/* Partner / Reseller Form */}
-      <div className="container mx-auto px-4">
-        <PartnerFormSection />
-      </div>
 
       {/* Footer */}
       <Footer />

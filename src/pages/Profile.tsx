@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Navigate, Link } from 'react-router-dom';
 import {
   User, Mail, Phone, Save, MapPin, ShoppingBag,
-  Heart, ChevronRight, Edit2, ShieldCheck, LogOut,
+  Heart, ChevronRight, Edit2, ShieldCheck, LogOut, Camera, Loader2,
 } from 'lucide-react';
 import { profileSchema } from '@/lib/validations';
 import { z } from 'zod';
@@ -29,7 +29,8 @@ const Profile = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ full_name: '', email: '', phone: '' });
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [formData, setFormData] = useState({ full_name: '', email: '', phone: '', avatar_url: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [orderCount, setOrderCount] = useState(0);
 
@@ -43,7 +44,34 @@ const Profile = () => {
 
   const loadProfile = async () => {
     const { data } = await supabase.from('profiles').select('*').eq('id', user?.id).maybeSingle();
-    if (data) setFormData({ full_name: data.full_name || '', email: data.email || '', phone: data.phone || '' });
+    if (data) setFormData({
+      full_name: data.full_name || '',
+      email: data.email || '',
+      phone: data.phone || '',
+      avatar_url: (data as any).avatar_url || '',
+    });
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${user?.id}-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('avatars').upload(path, file, { cacheControl: '3600', upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+      const avatarUrl = data.publicUrl;
+      await supabase.from('profiles').update({ avatar_url: avatarUrl } as any).eq('id', user?.id);
+      setFormData(f => ({ ...f, avatar_url: avatarUrl }));
+      toast({ title: 'Foto atualizada' });
+    } catch (err: any) {
+      toast({ title: 'Erro no upload', description: err.message, variant: 'destructive' });
+    } finally {
+      setUploadingAvatar(false);
+      e.target.value = '';
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -96,9 +124,29 @@ const Profile = () => {
 
         {/* Hero card */}
         <div className="bg-card border border-border rounded-2xl p-6 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <span className="text-2xl font-black text-primary">{initials}</span>
-          </div>
+          <label className="relative w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 cursor-pointer group/avatar">
+            {formData.avatar_url ? (
+              <img src={formData.avatar_url} alt="Foto de perfil" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+                <span className="text-2xl font-black text-primary">{initials}</span>
+              </div>
+            )}
+            {/* Hover overlay */}
+            <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1 opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+              {uploadingAvatar
+                ? <Loader2 className="w-5 h-5 text-white animate-spin" />
+                : <Camera className="w-5 h-5 text-white" />}
+              <span className="text-[9px] text-white font-bold">Alterar</span>
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarUpload}
+              disabled={uploadingAvatar}
+            />
+          </label>
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-black text-foreground truncate">{formData.full_name || 'Utilizador'}</h1>
             <p className="text-sm text-muted-foreground">{formData.email}</p>
@@ -180,6 +228,49 @@ const Profile = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+
+                  {/* Avatar upload */}
+                  <div className="flex flex-col items-center gap-3 py-2">
+                    <div className="relative group/av">
+                      <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-border bg-primary/10 flex items-center justify-center">
+                        {formData.avatar_url ? (
+                          <img src={formData.avatar_url} alt="Foto de perfil" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-3xl font-black text-primary">{initials}</span>
+                        )}
+                      </div>
+                      {/* Overlay */}
+                      <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover/av:opacity-100 transition-opacity cursor-pointer">
+                        {uploadingAvatar
+                          ? <Loader2 className="w-6 h-6 text-white animate-spin" />
+                          : <Camera className="w-6 h-6 text-white" />}
+                      </div>
+                      <label className="absolute inset-0 rounded-full cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleAvatarUpload}
+                          disabled={uploadingAvatar}
+                        />
+                      </label>
+                    </div>
+                    <div className="text-center">
+                      <label className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary cursor-pointer hover:underline">
+                        <Camera className="w-3.5 h-3.5" />
+                        {uploadingAvatar ? 'A carregar...' : 'Alterar foto de perfil'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleAvatarUpload}
+                          disabled={uploadingAvatar}
+                        />
+                      </label>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">JPG, PNG ou WEBP · máx 5 MB</p>
+                    </div>
+                  </div>
+
                   <div className="space-y-1.5">
                     <Label className="flex items-center gap-1.5 text-sm">
                       <User className="w-3.5 h-3.5" /> Nome Completo
