@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import sinkeraLogo from '@/assets/sinkera-logo.png';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { AdminProducts } from '@/components/admin/AdminProducts';
@@ -23,7 +24,7 @@ import { ResellerDashboard } from '@/components/admin/ResellerDashboard';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Newspaper, Tags,
   Award, Image as ImageIcon, Video, Handshake, Menu, X, ChevronRight,
-  LogOut, Settings, Bell, Wrench, Store, Tag, Megaphone, ClipboardCheck, Send,
+  LogOut, Settings, Bell, Wrench, Tag, Megaphone, ClipboardCheck, Send,
 } from 'lucide-react';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -126,16 +127,12 @@ export default function Admin() {
     <aside className={`flex flex-col bg-card border-r border-border h-full ${mobile ? '' : 'w-64'}`}>
       {/* Logo */}
       <div className="px-5 py-5 border-b border-border flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
-            <Store className="w-4 h-4 text-primary-foreground" />
-          </div>
-          <div>
-            <p className="text-sm font-black text-foreground leading-tight">Sinkera</p>
-            <p className="text-[10px] text-muted-foreground font-medium">
-              {isAdmin ? 'Administração' : 'Revendedor'}
-            </p>
-          </div>
+        <div className="flex flex-col gap-1">
+          <img src={sinkeraLogo} alt="Sinkera"
+               className="h-7 w-auto object-contain dark:invert dark:brightness-90" />
+          <p className="text-[10px] font-semibold text-muted-foreground tracking-[0.14em] uppercase leading-none">
+            {isAdmin ? 'Administração' : 'Parceiro'}
+          </p>
         </div>
         {mobile && (
           <button onClick={() => setSidebarOpen(false)} className="w-7 h-7 rounded-lg hover:bg-muted flex items-center justify-center">

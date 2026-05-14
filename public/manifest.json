@@ -1,0 +1,45 @@
+{
+  "name": "Sinkera — Tecnologia em Angola",
+  "short_name": "Sinkera",
+  "description": "A melhor loja tech de Angola. Smartphones, laptops, electrodomésticos e mais.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1e",
+  "theme_color": "#1a3a6e",
+  "orientation": "portrait-primary",
+  "categories": ["shopping", "technology"],
+  "lang": "pt-AO",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Ver Produtos",
+      "short_name": "Produtos",
+      "url": "/produtos",
+      "description": "Navegar pelo catálogo completo"
+    },
+    {
+      "name": "Os meus Pedidos",
+      "short_name": "Pedidos",
+      "url": "/pedidos",
+      "description": "Acompanhar encomendas"
+    }
+  ]
+}

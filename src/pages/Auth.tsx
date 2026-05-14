@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,8 +9,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import sinkeraLogo from '@/assets/sinkera-logo.png';
 
+async function getRoleDestination(userId: string): Promise<string> {
+  const { data } = await supabase.from('user_roles').select('role').eq('user_id', userId);
+  const roles = (data || []).map((r: any) => r.role);
+  if (roles.includes('admin') || roles.includes('reseller')) return '/admin';
+  return '/';
+}
+
 export default function Auth() {
-  const { user, signIn, signUp } = useAuth();
+  const { user, isAdmin, isReseller, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -22,8 +30,9 @@ export default function Auth() {
   const [signupPassword, setSignupPassword] = useState('');
   const [signupFullName, setSignupFullName] = useState('');
 
-  // Redirect if already logged in
+  // Redirect if already logged in — respect role
   if (user) {
+    if (isAdmin || isReseller) return <Navigate to="/admin" replace />;
     return <Navigate to="/" replace />;
   }
 
@@ -31,10 +40,12 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
     const { error } = await signIn(loginEmail, loginPassword);
-    setLoading(false);
     if (!error) {
-      navigate('/');
+      const { data: { user: u } } = await supabase.auth.getUser();
+      const dest = u ? await getRoleDestination(u.id) : '/';
+      navigate(dest, { replace: true });
     }
+    setLoading(false);
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -43,16 +54,13 @@ export default function Auth() {
     const { error, session } = await signUp(signupEmail, signupPassword, signupFullName);
     if (!error) {
       if (session) {
-        setLoading(false);
-        navigate('/');
+        navigate('/', { replace: true });
       } else {
         const { error: loginError } = await signIn(signupEmail, signupPassword);
-        setLoading(false);
-        if (!loginError) navigate('/');
+        if (!loginError) navigate('/', { replace: true });
       }
-    } else {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   return (

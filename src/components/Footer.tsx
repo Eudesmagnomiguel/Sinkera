@@ -1,4 +1,5 @@
-import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin, ArrowRight } from "lucide-react";
+import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin, ArrowRight, ShieldCheck, Truck, BadgeCheck } from "lucide-react";
+import { Link } from "react-router-dom";
 import sinkeraLogo from "@/assets/sinkera-logo-white.png";
 import paymentMulticaixa from "@/assets/payment-multicaixa.webp";
 import paymentBankTransfer from "@/assets/payment-bank-transfer.webp";
@@ -8,12 +9,12 @@ export const Footer = () => {
     <footer className="mt-12 sm:mt-16">
 
       {/* Newsletter Bar */}
-      <div className="bg-blue-700 py-8">
+      <div className="bg-[hsl(221_83%_28%)] py-8">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <h3 className="text-white text-lg font-bold">Receba as melhores ofertas!</h3>
-              <p className="text-blue-200 text-sm mt-1">
+              <p className="text-white/65 text-sm mt-1">
                 Inscreva-se e receba promoções exclusivas no seu email
               </p>
             </div>
@@ -24,11 +25,11 @@ export const Footer = () => {
               <input
                 type="email"
                 placeholder="O seu endereço de email"
-                className="flex-1 px-4 py-3 text-sm rounded-l-md text-gray-900 focus:outline-none placeholder-gray-400 bg-white"
+                className="flex-1 px-4 py-3 text-sm rounded-l-md text-foreground focus:outline-none placeholder-gray-400 bg-white"
               />
               <button
                 type="submit"
-                className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold px-5 py-3 rounded-r-md transition-colors text-sm whitespace-nowrap"
+                className="flex items-center gap-2 bg-[hsl(var(--cta-orange))] hover:bg-[hsl(var(--cta-orange-hover))] text-white font-semibold px-5 py-3 rounded-r-md transition-colors text-sm whitespace-nowrap"
               >
                 Inscrever
                 <ArrowRight className="w-4 h-4" />
@@ -39,7 +40,7 @@ export const Footer = () => {
       </div>
 
       {/* Main Footer */}
-      <div className="bg-gray-900 text-gray-300">
+      <div className="bg-[hsl(222_47%_6%)] text-white/55">
         <div className="container mx-auto px-4 py-10 sm:py-14">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 sm:gap-10">
 
@@ -50,7 +51,7 @@ export const Footer = () => {
                 alt="Sinkera"
                 className="h-10 w-auto brightness-0 invert"
               />
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-white/45 text-sm leading-relaxed">
                 A sua loja de referência para tecnologia em Angola. Produtos originais com garantia oficial e os melhores preços do mercado.
               </p>
               <div className="flex items-center gap-2">
@@ -63,7 +64,7 @@ export const Footer = () => {
                   <button
                     key={label}
                     aria-label={label}
-                    className="w-9 h-9 flex items-center justify-center bg-gray-800 hover:bg-blue-700 rounded-lg transition-colors"
+                    className="w-9 h-9 flex items-center justify-center bg-[hsl(222_47%_10%)] hover:bg-primary rounded-lg transition-colors"
                   >
                     <Icon className="w-4 h-4 text-gray-400 hover:text-white transition-colors" />
                   </button>
@@ -73,13 +74,13 @@ export const Footer = () => {
 
             {/* Quick Links */}
             <div>
-              <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
+              <h4 className="text-white font-semibold mb-4 text-[10px] uppercase tracking-[0.18em]">
                 Empresa
               </h4>
               <ul className="space-y-2">
                 {["Sobre Nós", "Blog & Notícias", "Trabalhe Connosco", "Parceiros", "Imprensa"].map((link) => (
                   <li key={link}>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    <a href="#" className="text-white/45 hover:text-white transition-colors text-sm">
                       {link}
                     </a>
                   </li>
@@ -89,13 +90,13 @@ export const Footer = () => {
 
             {/* Categories */}
             <div>
-              <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
+              <h4 className="text-white font-semibold mb-4 text-[10px] uppercase tracking-[0.18em]">
                 Categorias
               </h4>
               <ul className="space-y-2">
                 {["Smartphones", "Laptops", "TV & Áudio", "Câmeras", "Gaming", "Smartwatch", "Acessórios"].map((category) => (
                   <li key={category}>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    <a href="#" className="text-white/45 hover:text-white transition-colors text-sm">
                       {category}
                     </a>
                   </li>
@@ -105,15 +106,22 @@ export const Footer = () => {
 
             {/* Customer Service */}
             <div>
-              <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
+              <h4 className="text-white font-semibold mb-4 text-[10px] uppercase tracking-[0.18em]">
                 Apoio ao Cliente
               </h4>
               <ul className="space-y-2">
-                {["FAQ", "Como Comprar", "Rastrear Pedido", "Trocas e Devoluções", "Política de Privacidade", "Termos de Uso"].map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
-                      {link}
-                    </a>
+                {[
+                  { label: "FAQ",                    href: "#" },
+                  { label: "Como Comprar",           href: "#" },
+                  { label: "Rastrear Pedido",        href: "/pedidos" },
+                  { label: "Trocas e Devoluções",    href: "#" },
+                  { label: "Política de Privacidade", href: "/privacidade" },
+                  { label: "Termos de Uso",          href: "/termos" },
+                ].map(({ label, href }) => (
+                  <li key={label}>
+                    <Link to={href} className="text-white/45 hover:text-white transition-colors text-sm">
+                      {label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -122,37 +130,33 @@ export const Footer = () => {
             {/* Contact + Payments */}
             <div className="space-y-5">
               <div>
-                <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
+                <h4 className="text-white font-semibold mb-4 text-[10px] uppercase tracking-[0.18em]">
                   Contacto
                 </h4>
                 <ul className="space-y-2.5">
                   <li className="flex items-start gap-2.5">
-                    <MapPin className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-400 text-sm">Luanda, Angola</span>
+                    <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-white/45 text-sm">Luanda, Angola</span>
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <Phone className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                    <span className="text-gray-400 text-sm">+244 900 000 000</span>
+                    <Phone className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span className="text-white/45 text-sm">+244 900 000 000</span>
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <Mail className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                    <span className="text-gray-400 text-sm">suporte@sinkera.ao</span>
+                    <Mail className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span className="text-white/45 text-sm">suporte@sinkera.ao</span>
                   </li>
                 </ul>
               </div>
 
               {/* Payment Methods */}
               <div>
-                <h4 className="text-white font-bold mb-3 text-sm uppercase tracking-wider">
+                <h4 className="text-white font-semibold mb-3 text-[10px] uppercase tracking-[0.18em]">
                   Pagamento
                 </h4>
-                <div className="flex flex-wrap gap-2">
-                  <div className="bg-white rounded px-2 py-1">
-                    <img src={paymentMulticaixa} alt="Multicaixa Express" className="h-5 w-auto" />
-                  </div>
-                  <div className="bg-white rounded px-2 py-1">
-                    <img src={paymentBankTransfer} alt="Transferência Bancária" className="h-5 w-auto" />
-                  </div>
+                <div className="flex flex-wrap gap-3">
+                  <img src={paymentMulticaixa} alt="Multicaixa Express" className="h-6 w-auto brightness-0 invert opacity-80" />
+                  <img src={paymentBankTransfer} alt="Transferência Bancária" className="h-6 w-auto brightness-0 invert opacity-80" />
                 </div>
               </div>
             </div>
@@ -160,21 +164,21 @@ export const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800">
+        <div className="border-t border-white/8">
           <div className="container mx-auto px-4 py-5">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/30">
               <p>© 2025 Sinkera. Todos os direitos reservados.</p>
               <div className="flex items-center gap-4">
-                <span className="flex items-center gap-1">
-                  <span className="text-green-500">🔒</span>
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-green-400/70" />
                   Pagamento Seguro
                 </span>
-                <span className="flex items-center gap-1">
-                  <span className="text-blue-400">✓</span>
+                <span className="flex items-center gap-1.5">
+                  <BadgeCheck className="w-3.5 h-3.5 text-primary/70" />
                   Garantia Oficial
                 </span>
-                <span className="flex items-center gap-1">
-                  <span className="text-orange-400">🚚</span>
+                <span className="flex items-center gap-1.5">
+                  <Truck className="w-3.5 h-3.5 text-[hsl(var(--cta-orange))]/70" />
                   Entrega Rápida
                 </span>
               </div>

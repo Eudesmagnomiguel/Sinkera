@@ -1,23 +1,39 @@
 
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-AO">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sinkera - Nova Era Digital | Eletrônicos e Tecnologia</title>
-    <meta name="description" content="Sinkera - A nova era das compras digitais. Smartphones, laptops, gadgets e muito mais com a melhor experiência de compra online." />
+    <title>Sinkera — Tecnologia em Angola</title>
+    <meta name="description" content="Sinkera — A melhor loja tech de Angola. Smartphones, laptops, electrodomésticos, beleza e muito mais. Entregas em todo o país." />
     <meta name="author" content="Sinkera" />
-    <meta name="keywords" content="eletrônicos, smartphones, laptops, gadgets, tecnologia, loja online" />
+    <meta name="keywords" content="loja online angola, smartphones angola, laptops angola, electrodomésticos, tecnologia angola, sinkera" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://sinkera.ao/" />
 
-    <meta property="og:title" content="Sinkera - Nova Era Digital | Eletrônicos e Tecnologia" />
-    <meta property="og:description" content="A nova era das compras digitais. Eletrônicos, smartphones, laptops e gadgets com a melhor experiência online." />
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1a3a6e" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Sinkera" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Sinkera — Tecnologia em Angola" />
+    <meta property="og:description" content="A melhor loja tech de Angola. Smartphones, laptops, electrodomésticos e mais, com entrega rápida em todo o país." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:url" content="https://sinkera.ao/" />
+    <meta property="og:locale" content="pt_AO" />
+    <meta property="og:site_name" content="Sinkera" />
 
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@sinkera" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-    
+    <meta name="twitter:site" content="@sinkera_ao" />
+    <meta name="twitter:title" content="Sinkera — Tecnologia em Angola" />
+    <meta name="twitter:description" content="A melhor loja tech de Angola." />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -26,5 +42,12 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>
