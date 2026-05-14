@@ -464,6 +464,57 @@ export default function Checkout() {
                     ))}
                   </div>
 
+                  {/* Payment details by method */}
+                  {paymentMethod === 'multicaixa' && (
+                    <div className="mt-2 p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl space-y-2">
+                      <p className="text-xs font-bold text-red-700 dark:text-red-400 flex items-center gap-1.5">
+                        <Smartphone className="w-3.5 h-3.5" /> Dados Multicaixa Express
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 text-xs text-red-700 dark:text-red-300">
+                        <div>
+                          <p className="text-muted-foreground mb-0.5">Referência</p>
+                          <p className="font-bold font-mono text-lg">000 000 000</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground mb-0.5">Valor a pagar</p>
+                          <p className="font-bold">{fmtKz(cartTotal)}</p>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-red-600/70 dark:text-red-400/70">
+                        Após o pagamento, carregue o comprovativo abaixo.
+                      </p>
+                    </div>
+                  )}
+
+                  {paymentMethod === 'bank_transfer' && (
+                    <div className="mt-2 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl space-y-3">
+                      <p className="text-xs font-bold text-blue-700 dark:text-blue-400 flex items-center gap-1.5">
+                        <CreditCard className="w-3.5 h-3.5" /> Dados Bancários para Transferência
+                      </p>
+                      {[
+                        { bank: 'BAI', iban: 'AO06 0040 0000 0000 0000 1015 5', account: '40.0000.000001015.5' },
+                        { bank: 'BFA', iban: 'AO06 0055 0000 0000 0000 1015 5', account: '55.0000.000001015.5' },
+                      ].map(({ bank, iban, account }) => (
+                        <div key={bank} className="text-xs text-blue-800 dark:text-blue-200 space-y-0.5">
+                          <p className="font-bold">{bank}</p>
+                          <p className="text-muted-foreground">IBAN: <span className="font-mono font-semibold text-foreground">{iban}</span></p>
+                          <p className="text-muted-foreground">Conta: <span className="font-mono font-semibold text-foreground">{account}</span></p>
+                        </div>
+                      ))}
+                      <div className="border-t border-blue-200 dark:border-blue-700 pt-2 flex justify-between text-xs">
+                        <span className="text-muted-foreground">Titular</span>
+                        <span className="font-bold text-foreground">Sinkera Comércio, Lda.</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Valor</span>
+                        <span className="font-bold text-foreground">{fmtKz(cartTotal)}</span>
+                      </div>
+                      <p className="text-[10px] text-blue-600/70 dark:text-blue-400/70">
+                        Use o nº do pedido como referência. Carregue o comprovativo abaixo.
+                      </p>
+                    </div>
+                  )}
+
                 </div>
 
                 {/* Delivery summary */}

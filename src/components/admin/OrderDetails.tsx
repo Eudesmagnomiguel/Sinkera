@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Package, MapPin, CreditCard, Calendar, Truck, Save } from 'lucide-react';
+import { Package, MapPin, CreditCard, Calendar, Truck, Save, FileImage, ExternalLink } from 'lucide-react';
 import { notifyOrderStatus } from '@/lib/notifications';
 
 interface OrderItem {
@@ -267,6 +267,44 @@ export function OrderDetails({
           </div>
 
           <Separator />
+
+          {/* ── Payment Proof ── */}
+          {order.payment_proof_url && (
+            <>
+              <div className="space-y-3">
+                <h3 className="text-sm font-bold flex items-center gap-2">
+                  <FileImage className="w-4 h-4 text-muted-foreground" /> Comprovativo de Pagamento
+                </h3>
+                <div className="flex items-center gap-3 p-3 bg-muted/40 rounded-xl border border-border">
+                  {order.payment_proof_url.match(/\.(jpg|jpeg|png|webp|gif)$/i) ? (
+                    <img
+                      src={order.payment_proof_url}
+                      alt="Comprovativo"
+                      className="h-24 w-24 object-cover rounded-lg border border-border flex-shrink-0 cursor-pointer"
+                      onClick={() => window.open(order.payment_proof_url, '_blank')}
+                    />
+                  ) : (
+                    <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <FileImage className="w-6 h-6 text-primary" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground">Comprovativo enviado pelo cliente</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">{order.payment_proof_url}</p>
+                    <a
+                      href={order.payment_proof_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1.5"
+                    >
+                      <ExternalLink className="w-3 h-3" /> Abrir ficheiro
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <Separator />
+            </>
+          )}
 
           {/* ── Items ── */}
           <div>
