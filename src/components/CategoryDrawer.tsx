@@ -50,7 +50,7 @@ const MAIN_CATEGORIES = [
     id: "seguranca", name: "Segurança Electrónica", icon: Shield,
     color: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400",
     desc: "Câmaras, alarmes, controlo",
-    img: "https://images.unsplash.com/photo-1557597774-9d475d030a48?w=80&h=80&fit=crop",
+    img: "https://images.unsplash.com/photo-1562408590-e32931084e23?w=80&h=80&fit=crop",
   },
   {
     id: "acessorios", name: "Acessórios", icon: Headphones,
