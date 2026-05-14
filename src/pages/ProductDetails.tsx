@@ -144,9 +144,18 @@ export default function ProductDetails() {
     navigate("/carrinho");
   };
 
-  const handleShare = () => {
-    navigator.clipboard?.writeText(window.location.href);
-    toast({ title: "Link copiado!", description: "Partilha com quem precisar." });
+  const handleShare = async () => {
+    const shareData = {
+      title: product?.name ?? 'Produto Sinkera',
+      text: `${product?.name} — ${product?.price.toLocaleString('pt-AO')} Kz na Sinkera`,
+      url: window.location.href,
+    };
+    if (navigator.share && navigator.canShare?.(shareData)) {
+      try { await navigator.share(shareData); } catch { /* cancelado pelo utilizador */ }
+    } else {
+      await navigator.clipboard?.writeText(window.location.href);
+      toast({ title: "Link copiado!", description: "Partilha com quem precisar." });
+    }
   };
 
   const handleWhatsApp = () => {

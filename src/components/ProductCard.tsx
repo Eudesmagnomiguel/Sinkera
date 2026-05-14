@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Eye, Zap, BarChart2, Check, ShoppingCart } from "lucide-react";
+import { Heart, Eye, Zap, BarChart2, Check, ShoppingCart, Share2 } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCompare } from "@/hooks/useCompare";
+import { toast } from "@/hooks/use-toast";
 
 interface Product {
   id: string;
@@ -43,6 +44,22 @@ export const ProductCard = ({ product }: { product: Product }) => {
     addToCart(product.id);
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    const url = `${window.location.origin}/produto/${product.id}`;
+    const shareData = {
+      title: product.name,
+      text: `${product.name} — ${product.price.toLocaleString('pt-AO')} Kz na Sinkera`,
+      url,
+    };
+    if (navigator.share && navigator.canShare?.(shareData)) {
+      try { await navigator.share(shareData); } catch { /* cancelado */ }
+    } else {
+      await navigator.clipboard?.writeText(url);
+      toast({ title: "Link copiado!", description: "Partilha com quem precisar." });
+    }
   };
 
   const lowStock = product.stock_quantity != null
@@ -100,6 +117,13 @@ export const ProductCard = ({ product }: { product: Product }) => {
             }`}
           >
             {compared ? <Check className="w-4 h-4" /> : <BarChart2 className="w-4 h-4" />}
+          </button>
+          <button
+            onClick={handleShare}
+            title="Partilhar produto"
+            className="w-9 h-9 rounded-full bg-card shadow-md border border-border flex items-center justify-center hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-150"
+          >
+            <Share2 className="w-4 h-4" />
           </button>
         </div>
 
