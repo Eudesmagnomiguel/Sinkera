@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Heart, ShoppingCart, Star, Shield, RefreshCw, ChevronRight,
   Package, Share2, Minus, Plus, Check, MessageSquare,
-  ChevronLeft, Truck,
+  ChevronLeft, Truck, ZoomIn, X as XIcon,
 } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductVariants, VariantGroup } from "@/components/ProductVariants";
@@ -80,6 +80,7 @@ export default function ProductDetails() {
   const [searchQuery, setSearchQuery] = useState("");
   const [zoomed, setZoomed] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const [lightbox, setLightbox] = useState(false);
   const imgRef = useRef<HTMLDivElement>(null);
 
   const { user } = useAuth();
@@ -285,7 +286,8 @@ export default function ProductDetails() {
               onMouseEnter={() => setZoomed(true)}
               onMouseLeave={() => setZoomed(false)}
               onMouseMove={handleMouseMove}
-              className="relative aspect-square bg-gray-50 dark:bg-card rounded-2xl overflow-hidden cursor-zoom-in shadow-sm"
+              onClick={() => setLightbox(true)}
+              className="relative aspect-square bg-gray-50 dark:bg-card rounded-2xl overflow-hidden cursor-zoom-in shadow-sm group/img"
             >
               <img
                 src={images[selectedImage]}
@@ -293,6 +295,13 @@ export default function ProductDetails() {
                 className="w-full h-full object-contain p-10 transition-transform duration-300"
                 style={zoomed ? { transform: "scale(2.2)", transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : {}}
               />
+              {/* Zoom hint */}
+              {!zoomed && (
+                <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/30 backdrop-blur-sm text-white text-[10px] font-semibold px-2.5 py-1.5 rounded-full opacity-0 group-hover/img:opacity-100 transition-opacity pointer-events-none">
+                  <ZoomIn className="w-3 h-3" />
+                  Ampliar
+                </div>
+              )}
               <button
                 onClick={handleWishlistToggle}
                 className={`absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center shadow transition-all ${
@@ -651,6 +660,49 @@ export default function ProductDetails() {
 
       <div className="h-20 lg:hidden" />
       <Footer />
+
+      {/* Lightbox */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[99] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+          onClick={() => setLightbox(false)}
+        >
+          <button
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+            onClick={() => setLightbox(false)}
+          >
+            <XIcon className="w-5 h-5" />
+          </button>
+          {images.length > 1 && (
+            <>
+              <button
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                onClick={e => { e.stopPropagation(); setSelectedImage(i => (i - 1 + images.length) % images.length); }}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                onClick={e => { e.stopPropagation(); setSelectedImage(i => (i + 1) % images.length); }}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </>
+          )}
+          <img
+            src={images[selectedImage]}
+            alt={product.name}
+            className="max-w-full max-h-full object-contain rounded-xl"
+            style={{ touchAction: 'pinch-zoom' }}
+            onClick={e => e.stopPropagation()}
+          />
+          {images.length > 1 && (
+            <span className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white/50 text-xs">
+              {selectedImage + 1} / {images.length}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
