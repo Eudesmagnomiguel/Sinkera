@@ -192,7 +192,7 @@ export default function Auth() {
                 A melhor loja<br />tech de Angola.
               </h1>
               <p className="text-white/40 text-sm leading-relaxed max-w-xs">
-                Smartphones, laptops, electrodomésticos e muito mais — entrega rápida em todo o país.
+                Smartphones, laptops, electrodomésticos e muito mais. Entrega rápida em todo o país.
               </p>
             </div>
 
