@@ -28,7 +28,7 @@ const FEATURES = [
   {
     icon: Lock,
     title: "Pagamento Seguro",
-    description: "Multicaixa · Visa",
+    description: "Multicaixa Express · Transferência",
     accent: "text-amber-600 dark:text-amber-400",
     bg: "bg-amber-50 dark:bg-amber-950/40",
     border: "border-amber-100 dark:border-amber-900/50",

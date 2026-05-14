@@ -1,97 +1,124 @@
-import { Tag, Clock, Zap, ArrowRight } from "lucide-react";
-import promoFreeShipping from "@/assets/promo-free-shipping.jpg";
-import promoBlackFriday from "@/assets/promo-black-friday.jpg";
-import promoFlashSale from "@/assets/promo-flash-sale.jpg";
+import { useEffect, useState } from 'react';
+import { ArrowRight } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
+
+interface PromoBanner {
+  id: string;
+  title: string;
+  description: string | null;
+  badge: string | null;
+  badge_color: string;
+  bg_color: string;
+  image_url: string | null;
+  cta_label: string;
+  cta_link: string;
+  position: number;
+}
+
+// Fallback while DB not seeded
+const FALLBACK: PromoBanner[] = [
+  { id: '1', title: 'Envio Grátis',     description: 'Em compras acima de 50.000 Kz',     badge: 'Sem Limite',     badge_color: '#2563EB', bg_color: '#1B4FD8', image_url: null, cta_label: 'Comprar Agora',     cta_link: '/produtos', position: 0 },
+  { id: '2', title: 'Até 50% OFF',      description: 'Em electrodomésticos e smartphones', badge: 'Tempo Limitado', badge_color: '#DC2626', bg_color: '#111827', image_url: null, cta_label: 'Ver Promoções',     cta_link: '/produtos', position: 1 },
+  { id: '3', title: 'Oferta Relâmpago', description: 'Desconto de 30% — válido hoje',       badge: 'Hoje Só',        badge_color: '#EA580C', bg_color: '#431407', image_url: null, cta_label: 'Aproveitar Oferta', cta_link: '/produtos', position: 2 },
+];
 
 export const PromotionsSection = () => {
-  const promotions = [
-    {
-      id: 1,
-      title: "Envio Grátis",
-      description: "Em compras acima de 50.000 Kz",
-      cta: "Comprar Agora",
-      badge: "Sem Limite",
-      badgeColor: "bg-blue-600",
-      image: promoFreeShipping,
-      accent: "#1B4FD8",
-      overlay: "from-blue-900/90 via-blue-800/60",
-    },
-    {
-      id: 2,
-      title: "Até 50% OFF",
-      description: "Em electrodomésticos e smartphones",
-      cta: "Ver Promoções",
-      badge: "Tempo Limitado",
-      badgeColor: "bg-red-600",
-      image: promoBlackFriday,
-      accent: "#DC2626",
-      overlay: "from-gray-950/90 via-gray-900/60",
-    },
-    {
-      id: 3,
-      title: "Oferta Relâmpago",
-      description: "Desconto de 30% — válido hoje",
-      cta: "Aproveitar Oferta",
-      badge: "Hoje Só",
-      badgeColor: "bg-orange-600",
-      image: promoFlashSale,
-      accent: "#EA580C",
-      overlay: "from-orange-950/90 via-orange-900/60",
-    },
-  ];
+  const [banners, setBanners] = useState<PromoBanner[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (supabase as any)
+      .from('promo_banners')
+      .select('*')
+      .eq('is_active', true)
+      .order('position')
+      .then(({ data }: { data: PromoBanner[] | null }) => {
+        setBanners(data && data.length > 0 ? data : FALLBACK);
+        setLoading(false);
+      })
+      .catch(() => {
+        setBanners(FALLBACK);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-10">
+        <div className="h-8 w-56 bg-muted rounded-lg animate-pulse mb-6" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map(i => <div key={i} className="aspect-[4/3] rounded-xl bg-muted animate-pulse" />)}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-10">
-      {/* Section Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-foreground">
             Promoções <span className="text-red-600">Ativas</span>
           </h2>
-          <p className="text-gray-500 text-sm mt-1">Ofertas por tempo limitado — não perca</p>
+          <p className="text-gray-500 dark:text-muted-foreground text-sm mt-1">Ofertas por tempo limitado — não perca</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {promotions.map((promo) => (
-          <div
+        {banners.map((promo) => (
+          <Link
             key={promo.id}
-            className="relative overflow-hidden rounded-xl group cursor-pointer shadow-sm hover:shadow-lg transition-shadow duration-300"
+            to={promo.cta_link || '/produtos'}
+            className="relative overflow-hidden rounded-xl group cursor-pointer shadow-sm hover:shadow-lg transition-shadow duration-300 block"
           >
-            {/* Background Image */}
             <div className="aspect-[4/3] relative overflow-hidden">
-              <img
-                src={promo.image}
-                alt={promo.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              {/* Background colour */}
+              <div className="absolute inset-0" style={{ backgroundColor: promo.bg_color }} />
+
+              {/* Background image if set */}
+              {promo.image_url && (
+                <img
+                  src={promo.image_url}
+                  alt={promo.title}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              )}
+
+              {/* Gradient overlay for readability */}
+              <div
+                className="absolute inset-0"
+                style={{ background: `linear-gradient(to right, ${promo.bg_color}f0 0%, ${promo.bg_color}99 55%, transparent 100%)` }}
               />
-              {/* Gradient overlay */}
-              <div className={`absolute inset-0 bg-gradient-to-r ${promo.overlay} to-transparent`} />
 
               {/* Content */}
               <div className="absolute inset-0 flex flex-col justify-between p-5">
-                {/* Badge */}
                 <div>
-                  <span className={`${promo.badgeColor} text-white text-xs font-bold px-2.5 py-1 rounded uppercase tracking-wider`}>
-                    {promo.badge}
-                  </span>
+                  {promo.badge && (
+                    <span
+                      className="text-white text-xs font-bold px-2.5 py-1 rounded uppercase tracking-wider"
+                      style={{ backgroundColor: promo.badge_color }}
+                    >
+                      {promo.badge}
+                    </span>
+                  )}
                 </div>
 
-                {/* Text */}
                 <div>
-                  <h3 className="text-white text-xl sm:text-2xl font-bold leading-tight mb-1">
+                  <h3 className="text-white text-xl sm:text-2xl font-bold leading-tight mb-1 drop-shadow">
                     {promo.title}
                   </h3>
-                  <p className="text-white/80 text-sm mb-4">{promo.description}</p>
-
-                  <button className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold text-sm px-4 py-2.5 rounded-md hover:bg-gray-100 transition-colors group/btn">
-                    {promo.cta}
+                  {promo.description && (
+                    <p className="text-white/85 text-sm mb-4 drop-shadow">{promo.description}</p>
+                  )}
+                  <button className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold text-sm px-4 py-2.5 rounded-md hover:bg-gray-100 transition-colors group/btn shadow-md">
+                    {promo.cta_label || 'Ver Promoções'}
                     <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5" />
                   </button>
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </section>

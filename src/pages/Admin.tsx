@@ -14,18 +14,19 @@ import { AdminVideos } from '@/components/admin/AdminVideos';
 import { AdminPartners } from '@/components/admin/AdminPartners';
 import { AdminSupport } from '@/components/admin/AdminSupport';
 import { AdminCoupons } from '@/components/admin/AdminCoupons';
+import { AdminPromoBanners } from '@/components/admin/AdminPromoBanners';
 import { ResellerProducts } from '@/components/admin/ResellerProducts';
 import { ResellerOrders } from '@/components/admin/ResellerOrders';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Newspaper, Tags,
   Award, Image as ImageIcon, Video, Handshake, Menu, X, ChevronRight,
-  LogOut, Settings, Bell, Wrench, Store, Tag,
+  LogOut, Settings, Bell, Wrench, Store, Tag, Megaphone,
 } from 'lucide-react';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type AdminSection =
   | 'dashboard' | 'orders' | 'products' | 'categories' | 'brands'
-  | 'banners' | 'videos' | 'news' | 'users' | 'partners' | 'support' | 'coupons';
+  | 'banners' | 'promobanners' | 'videos' | 'news' | 'users' | 'partners' | 'support' | 'coupons';
 
 type ResellerSection = 'products' | 'orders';
 
@@ -43,8 +44,9 @@ const ADMIN_NAV: NavItem[] = [
   { id: 'products',   label: 'Produtos',        icon: Package },
   { id: 'categories', label: 'Categorias',      icon: Tags },
   { id: 'brands',     label: 'Marcas',          icon: Award },
-  { id: 'banners',    label: 'Banners',         icon: ImageIcon },
-  { id: 'videos',     label: 'Vídeos',          icon: Video },
+  { id: 'banners',      label: 'Banners',          icon: ImageIcon },
+  { id: 'promobanners', label: 'Banners Promo',   icon: Megaphone },
+  { id: 'videos',       label: 'Vídeos',           icon: Video },
   { id: 'news',       label: 'Notícias',        icon: Newspaper },
   { id: 'users',      label: 'Utilizadores',    icon: Users },
   { id: 'partners',   label: 'Parceiros',       icon: Handshake },
@@ -195,7 +197,8 @@ export default function Admin() {
       case 'products':   return <><SectionTitle title="Produtos" desc="Catálogo completo — adicionar, editar e remover produtos" /><AdminProducts /></>;
       case 'categories': return <><SectionTitle title="Categorias" desc="Organizar produtos por categorias" /><AdminCategories /></>;
       case 'brands':     return <><SectionTitle title="Marcas" desc="Gerir marcas e logos em destaque" /><AdminBrands /></>;
-      case 'banners':    return <><SectionTitle title="Banners" desc="Imagens promocionais da página inicial" /><AdminBanners /></>;
+      case 'banners':      return <><SectionTitle title="Banners" desc="Imagens promocionais da página inicial" /><AdminBanners /></>;
+      case 'promobanners': return <><SectionTitle title="Banners de Promoção" desc="Banners da secção Promoções Ativas — cor de fundo editável" /><AdminPromoBanners /></>;
       case 'videos':     return <><SectionTitle title="Vídeos em Destaque" desc="Os 4 slots de vídeo na página inicial" /><AdminVideos /></>;
       case 'news':       return <><SectionTitle title="Notícias & Tendências" desc="Artigos e conteúdo editorial" /><AdminNewsTrends /></>;
       case 'users':      return <><SectionTitle title="Utilizadores" desc="Gerir contas, roles e permissões" /><AdminUsers /></>;

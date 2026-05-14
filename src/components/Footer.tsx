@@ -2,7 +2,6 @@ import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin, ArrowRight 
 import sinkeraLogo from "@/assets/sinkera-logo-white.png";
 import paymentMulticaixa from "@/assets/payment-multicaixa.webp";
 import paymentBankTransfer from "@/assets/payment-bank-transfer.webp";
-import paymentVisaMastercard from "@/assets/payment-visa-mastercard.webp";
 
 export const Footer = () => {
   return (
