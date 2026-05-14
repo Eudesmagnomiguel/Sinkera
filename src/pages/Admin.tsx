@@ -283,15 +283,9 @@ export default function Admin() {
         <main className="flex-1 p-4 sm:p-6">
           {isAdmin ? renderAdminContent() : (
             <>
-              {resellerSection === 'dashboard' && (
-                <><SectionTitle title="Dashboard" desc="Visão geral das suas vendas e desempenho" /><ResellerDashboard /></>
-              )}
-              {resellerSection === 'products' && (
-                <><SectionTitle title="Meus Produtos" desc="Gerir o seu catálogo de produtos" /><ResellerProducts /></>
-              )}
-              {resellerSection === 'orders' && (
-                <><SectionTitle title="Pedidos" desc="Acompanhar e rastrear as suas encomendas" /><ResellerOrders /></>
-              )}
+              {resellerSection === 'dashboard' && <ResellerDashboard />}
+              {resellerSection === 'products'  && <ResellerProducts />}
+              {resellerSection === 'orders'    && <ResellerOrders />}
             </>
           )}
         </main>

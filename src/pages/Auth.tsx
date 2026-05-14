@@ -102,7 +102,7 @@ export default function Auth() {
 
         <div className="relative z-10 flex flex-col h-full px-14 py-12">
           {/* Logo */}
-          <img src={sinkeraLogoWhite} alt="Sinkera" className="h-8 w-auto opacity-95" />
+          <img src={sinkeraLogoWhite} alt="Sinkera" className="h-5 w-auto opacity-85" />
 
           {/* Main content */}
           <div className="flex-1 flex flex-col justify-center max-w-md">
@@ -143,7 +143,7 @@ export default function Auth() {
         {/* Mobile logo */}
         <div className="lg:hidden px-8 pt-8 pb-4 flex items-center justify-between"
              style={{ borderBottom: '1px solid hsl(var(--border))' }}>
-          <img src={sinkeraLogoWhite} alt="Sinkera" className="h-7 dark:opacity-95 invert dark:invert-0" />
+          <img src={sinkeraLogoWhite} alt="Sinkera" className="h-5 dark:opacity-85 invert dark:invert-0" />
         </div>
 
         <div className="flex-1 flex flex-col justify-center px-8 sm:px-16 lg:px-20 py-12 max-w-xl w-full mx-auto">

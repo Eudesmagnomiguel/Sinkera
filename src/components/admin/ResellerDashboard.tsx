@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import {
-  ShoppingBag, TrendingUp, Wallet, Package, Trophy, Clock,
-  Truck, CheckCircle2, XCircle, Loader2, BarChart3, Medal,
+  ShoppingBag, TrendingUp, Wallet, Package,
+  Clock, Truck, CheckCircle2, XCircle, Loader2,
+  Medal, ArrowUpRight,
 } from 'lucide-react';
 
 const COMMISSION_RATE = 0.10;
@@ -18,26 +17,33 @@ interface OrderSummary {
   customerName: string;
 }
 
-interface RankEntry {
-  seller_id: string;
-  revenue: number;
-  name: string;
-}
+interface RankEntry { seller_id: string; revenue: number; name: string; }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  pending:    { label: 'Pendente',          color: 'text-yellow-600 bg-yellow-50 dark:bg-yellow-950/40',  icon: Clock },
-  processing: { label: 'Em Processamento',  color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40',       icon: Loader2 },
-  shipped:    { label: 'Enviado',           color: 'text-violet-600 bg-violet-50 dark:bg-violet-950/40', icon: Truck },
-  delivered:  { label: 'Entregue',          color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40', icon: CheckCircle2 },
-  cancelled:  { label: 'Cancelado',         color: 'text-red-600 bg-red-50 dark:bg-red-950/40',          icon: XCircle },
+const STATUS_CFG: Record<string, { label: string; icon: React.ElementType; dot: string }> = {
+  pending:    { label: 'Pendente',         icon: Clock,        dot: 'bg-amber-400'   },
+  processing: { label: 'Em Processamento', icon: Loader2,      dot: 'bg-blue-400'    },
+  shipped:    { label: 'Enviado',          icon: Truck,        dot: 'bg-violet-400'  },
+  completed:  { label: 'Entregue',         icon: CheckCircle2, dot: 'bg-emerald-400' },
+  cancelled:  { label: 'Cancelado',        icon: XCircle,      dot: 'bg-red-400'     },
 };
+
+const fmtKz = (n: number) => n.toLocaleString('pt-AO', { maximumFractionDigits: 0 }) + ' Kz';
+
+// ── Thin section divider ──────────────────────────────────────────────────────
+function Eyebrow({ label }: { label: string }) {
+  return (
+    <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-muted-foreground mb-3">
+      {label}
+    </p>
+  );
+}
 
 export function ResellerDashboard() {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [productCount, setProductCount] = useState(0);
-  const [orders, setOrders] = useState<OrderSummary[]>([]);
-  const [ranking, setRanking] = useState<RankEntry[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [productCount, setPC]       = useState(0);
+  const [orders, setOrders]         = useState<OrderSummary[]>([]);
+  const [ranking, setRanking]       = useState<RankEntry[]>([]);
 
   useEffect(() => { load(); }, []);
 
@@ -49,51 +55,33 @@ export function ResellerDashboard() {
 
   const loadProducts = async () => {
     const { count } = await supabase
-      .from('products')
-      .select('id', { count: 'exact', head: true })
-      .eq('seller_id', user?.id);
-    setProductCount(count || 0);
+      .from('products').select('id', { count: 'exact', head: true }).eq('seller_id', user?.id);
+    setPC(count || 0);
   };
 
   const loadOrders = async () => {
     const { data: items } = await supabase
-      .from('order_items')
-      .select('order_id, products!inner(seller_id)')
-      .eq('products.seller_id', user?.id);
-
+      .from('order_items').select('order_id, products!inner(seller_id)').eq('products.seller_id', user?.id);
     const ids = [...new Set((items || []).map((i: any) => i.order_id))];
     if (!ids.length) return;
 
-    const { data: ordersData } = await supabase
-      .from('orders')
-      .select('id, status, total_amount, created_at, user_id')
-      .in('id', ids)
+    const { data: ods } = await supabase
+      .from('orders').select('id, status, total_amount, created_at, user_id').in('id', ids)
       .order('created_at', { ascending: false });
+    if (!ods?.length) return;
 
-    if (!ordersData?.length) return;
+    const { data: profs } = await supabase
+      .from('profiles').select('id, full_name').in('id', ods.map(o => o.user_id));
 
-    const userIds = ordersData.map((o) => o.user_id);
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, full_name')
-      .in('id', userIds);
-
-    setOrders(
-      ordersData.map((o) => ({
-        id: o.id,
-        status: o.status,
-        total_amount: o.total_amount,
-        created_at: o.created_at,
-        customerName: profiles?.find((p) => p.id === o.user_id)?.full_name || 'Cliente',
-      }))
-    );
+    setOrders(ods.map(o => ({
+      id: o.id, status: o.status, total_amount: o.total_amount, created_at: o.created_at,
+      customerName: profs?.find(p => p.id === o.user_id)?.full_name || 'Cliente',
+    })));
   };
 
   const loadRanking = async () => {
     const { data } = await supabase
-      .from('order_items')
-      .select('price, quantity, products!inner(seller_id)') as any;
-
+      .from('order_items').select('price, quantity, products!inner(seller_id)') as any;
     if (!data?.length) return;
 
     const map: Record<string, number> = {};
@@ -102,175 +90,168 @@ export function ResellerDashboard() {
       if (!sid) continue;
       map[sid] = (map[sid] || 0) + item.price * item.quantity;
     }
-
     const { data: profs } = await supabase
-      .from('profiles')
-      .select('id, full_name')
-      .in('id', Object.keys(map));
-
-    const entries: RankEntry[] = Object.entries(map)
-      .map(([seller_id, revenue]) => ({
-        seller_id,
-        revenue,
-        name: profs?.find((p) => p.id === seller_id)?.full_name || 'Parceiro',
-      }))
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 5);
-
-    setRanking(entries);
+      .from('profiles').select('id, full_name').in('id', Object.keys(map));
+    setRanking(
+      Object.entries(map)
+        .map(([seller_id, revenue]) => ({ seller_id, revenue, name: profs?.find(p => p.id === seller_id)?.full_name || 'Parceiro' }))
+        .sort((a, b) => b.revenue - a.revenue).slice(0, 5)
+    );
   };
 
   const totalRevenue = orders.reduce((s, o) => s + o.total_amount, 0);
-  const commission = totalRevenue * COMMISSION_RATE;
-  const byStatus = orders.reduce<Record<string, number>>((acc, o) => {
-    acc[o.status] = (acc[o.status] || 0) + 1;
-    return acc;
-  }, {});
-  const myRank = ranking.findIndex((r) => r.seller_id === user?.id) + 1;
+  const commission   = totalRevenue * COMMISSION_RATE;
+  const byStatus     = orders.reduce<Record<string, number>>((acc, o) => { acc[o.status] = (acc[o.status] || 0) + 1; return acc; }, {});
+  const myRank       = ranking.findIndex(r => r.seller_id === user?.id) + 1;
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center py-24">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
+  const KPIS = [
+    { label: 'Produtos Activos',  value: productCount,                              icon: Package,     accent: 'text-primary'            },
+    { label: 'Total de Pedidos',  value: orders.length,                             icon: ShoppingBag, accent: 'text-violet-600 dark:text-violet-400' },
+    { label: 'Volume de Vendas',  value: fmtKz(totalRevenue),                       icon: TrendingUp,  accent: 'text-emerald-600 dark:text-emerald-400' },
+    { label: 'Comissão (10%)',    value: fmtKz(commission),                         icon: Wallet,      accent: 'text-[hsl(22_100%_46%)]', highlight: true },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Produtos', value: productCount, icon: Package, color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40' },
-          { label: 'Pedidos', value: orders.length, icon: ShoppingBag, color: 'text-violet-600 bg-violet-50 dark:bg-violet-950/40' },
-          { label: 'Volume de Vendas', value: `${totalRevenue.toLocaleString('pt-AO', { maximumFractionDigits: 0 })} Kz`, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40' },
-          { label: 'Comissão (10%)', value: `${commission.toLocaleString('pt-AO', { maximumFractionDigits: 0 })} Kz`, icon: Wallet, color: 'text-amber-600 bg-amber-50 dark:bg-amber-950/40', highlight: true },
-        ].map(({ label, value, icon: Icon, color, highlight }) => (
-          <Card key={label} className={highlight ? 'border-amber-200 dark:border-amber-800' : ''}>
-            <CardContent className="flex items-center gap-3 pt-5">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
-                <Icon className="w-5 h-5" />
+    <div className="space-y-8">
+
+      {/* ── KPIs ── */}
+      <div>
+        <Eyebrow label="Resumo" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {KPIS.map(({ label, value, icon: Icon, accent, highlight }) => (
+            <div
+              key={label}
+              className={`rounded-2xl border p-5 space-y-3 transition-all ${
+                highlight
+                  ? 'border-[hsl(22_100%_46%)/30%] bg-[hsl(22_100%_46%)/4%]'
+                  : 'border-border bg-card hover:border-border/60'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  {label}
+                </p>
+                <Icon className={`w-3.5 h-3.5 ${accent}`} />
               </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground truncate">{label}</p>
-                <p className={`text-lg font-black truncate ${highlight ? 'text-amber-600' : ''}`}>{value}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              <p className={`text-2xl font-black tracking-tight leading-none ${accent}`}>
+                {value}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Delivery status breakdown */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Truck className="w-4 h-4 text-primary" /> Rastreio de Entregas
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {Object.keys(STATUS_CONFIG).map((key) => {
-              const cfg = STATUS_CONFIG[key];
+      <div className="grid lg:grid-cols-2 gap-6">
+
+        {/* ── Status breakdown ── */}
+        <div>
+          <Eyebrow label="Rastreio de Entregas" />
+          <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
+            {Object.entries(STATUS_CFG).map(([key, { label, icon: Icon, dot }]) => {
               const count = byStatus[key] || 0;
-              const pct = orders.length ? Math.round((count / orders.length) * 100) : 0;
-              const Icon = cfg.icon;
+              const pct   = orders.length ? Math.round((count / orders.length) * 100) : 0;
               return (
-                <div key={key} className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${cfg.color}`}>
-                    <Icon className="w-4 h-4" />
+                <div key={key} className="flex items-center gap-3 px-5 py-3.5">
+                  <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dot}`} />
+                  <span className="text-sm text-foreground flex-1">{label}</span>
+                  <div className="w-20 h-1 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full bg-primary/60 rounded-full" style={{ width: `${pct}%` }} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium">{cfg.label}</span>
-                      <span className="text-xs text-muted-foreground">{count} pedidos</span>
-                    </div>
-                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary/60 rounded-full transition-all"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                  </div>
+                  <span className="text-xs text-muted-foreground w-6 text-right tabular-nums">{count}</span>
                 </div>
               );
             })}
             {orders.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">Sem pedidos ainda</p>
+              <p className="text-sm text-muted-foreground text-center py-6">Sem pedidos ainda</p>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Sales ranking */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <BarChart3 className="w-4 h-4 text-primary" /> Ranking de Parceiros
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {ranking.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">Sem dados de vendas ainda</p>
+        {/* ── Ranking ── */}
+        <div>
+          <Eyebrow label="Ranking de Parceiros" />
+          <div className="rounded-2xl border border-border bg-card overflow-hidden">
+            {ranking.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">Sem dados de vendas ainda</p>
+            ) : (
+              <div className="divide-y divide-border">
+                {ranking.map((entry, i) => {
+                  const isMe   = entry.seller_id === user?.id;
+                  const medals = ['text-amber-400', 'text-zinc-400', 'text-amber-600'];
+                  return (
+                    <div
+                      key={entry.seller_id}
+                      className={`flex items-center gap-4 px-5 py-3.5 transition-colors ${
+                        isMe ? 'bg-primary/5' : 'hover:bg-muted/30'
+                      }`}
+                    >
+                      <div className="w-5 text-center flex-shrink-0">
+                        {i < 3
+                          ? <Medal className={`w-4 h-4 mx-auto ${medals[i]}`} />
+                          : <span className="text-[11px] font-bold text-muted-foreground">#{i + 1}</span>
+                        }
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-semibold truncate ${isMe ? 'text-primary' : 'text-foreground'}`}>
+                          {isMe ? '· Você' : entry.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground tabular-nums">{fmtKz(entry.revenue)}</p>
+                      </div>
+                      {isMe && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-primary/30 text-primary bg-primary/5">
+                          #{myRank}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             )}
-            {ranking.map((entry, i) => {
-              const isMe = entry.seller_id === user?.id;
-              const medal = i === 0 ? 'text-yellow-500' : i === 1 ? 'text-gray-400' : i === 2 ? 'text-amber-600' : 'text-muted-foreground';
-              return (
-                <div
-                  key={entry.seller_id}
-                  className={`flex items-center gap-3 p-2 rounded-xl transition-colors ${isMe ? 'bg-primary/5 border border-primary/20' : 'hover:bg-muted/40'}`}
-                >
-                  <div className="w-7 h-7 flex items-center justify-center flex-shrink-0">
-                    {i < 3 ? <Medal className={`w-5 h-5 ${medal}`} /> : <span className="text-xs font-bold text-muted-foreground">#{i + 1}</span>}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-semibold truncate ${isMe ? 'text-primary' : ''}`}>
-                      {isMe ? 'Você' : entry.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{entry.revenue.toLocaleString('pt-AO', { maximumFractionDigits: 0 })} Kz em vendas</p>
-                  </div>
-                  {isMe && <Badge variant="outline" className="text-primary border-primary/30 text-xs">#{myRank}</Badge>}
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      {/* Recent orders */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <ShoppingBag className="w-4 h-4 text-primary" /> Pedidos Recentes
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      {/* ── Recent orders ── */}
+      <div>
+        <Eyebrow label="Pedidos Recentes" />
+        <div className="rounded-2xl border border-border bg-card overflow-hidden">
           {orders.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">Sem pedidos ainda</p>
+            <p className="text-sm text-muted-foreground text-center py-10">Sem pedidos ainda</p>
           ) : (
-            <div className="space-y-2">
-              {orders.slice(0, 8).map((o) => {
-                const cfg = STATUS_CONFIG[o.status] || { label: o.status, color: '', icon: Clock };
-                const Icon = cfg.icon;
+            <div className="divide-y divide-border">
+              {orders.slice(0, 8).map(o => {
+                const cfg = STATUS_CFG[o.status] ?? { label: o.status, dot: 'bg-muted-foreground', icon: Clock };
                 return (
-                  <div key={o.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/40 transition-colors">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${cfg.color}`}>
-                      <Icon className="w-3.5 h-3.5" />
-                    </div>
+                  <div key={o.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-muted/20 transition-colors">
+                    <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{o.customerName}</p>
-                      <p className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString('pt-AO')}</p>
+                      <p className="text-sm font-medium text-foreground truncate">{o.customerName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {cfg.label} · {new Date(o.created_at).toLocaleDateString('pt-AO')}
+                      </p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="text-sm font-bold">{o.total_amount.toLocaleString('pt-AO', { maximumFractionDigits: 0 })} Kz</p>
-                      <p className="text-xs text-amber-600 font-medium">{(o.total_amount * COMMISSION_RATE).toLocaleString('pt-AO', { maximumFractionDigits: 0 })} Kz comissão</p>
+                      <p className="text-sm font-bold text-foreground tabular-nums">{fmtKz(o.total_amount)}</p>
+                      <p className="text-[11px] text-[hsl(22_100%_46%)] font-semibold tabular-nums">
+                        +{fmtKz(o.total_amount * COMMISSION_RATE)}
+                      </p>
                     </div>
                   </div>
                 );
               })}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
     </div>
   );
 }
