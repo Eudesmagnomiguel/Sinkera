@@ -41,20 +41,35 @@ export const BrandsSection = () => {
   if (loading) {
     return (
       <section className="py-8">
-        <div className="flex items-center justify-between mb-5">
-          <div className="h-7 w-48 bg-muted rounded-lg animate-pulse" />
-        </div>
-        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3">
+        <div className="h-7 w-48 bg-muted rounded-lg animate-pulse mb-5" />
+        <div className="flex gap-3 overflow-hidden">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="aspect-square rounded-xl bg-muted animate-pulse" />
+            <div key={i} className="flex-shrink-0 w-28 h-16 rounded-xl bg-muted animate-pulse" />
           ))}
         </div>
       </section>
     );
   }
 
+  // Duplicate for seamless infinite loop
+  const track = [...brands, ...brands, ...brands];
+
   return (
     <section className="py-8">
+      <style>{`
+        @keyframes brands-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-33.333%); }
+        }
+        .brands-track {
+          animation: brands-scroll ${Math.max(brands.length * 3, 18)}s linear infinite;
+        }
+        .brands-track:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+
+      {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">Marcas</p>
@@ -66,47 +81,44 @@ export const BrandsSection = () => {
           to="/produtos"
           className="hidden sm:flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
         >
-          Ver todas as marcas <ChevronRight className="w-4 h-4" />
+          Ver todas <ChevronRight className="w-4 h-4" />
         </Link>
       </div>
 
-      <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3">
-        {brands.map((brand) => (
-          <Link
-            key={brand.id}
-            to={`/produtos?brand=${brand.slug}`}
-            className="group flex flex-col items-center justify-center gap-2 p-3 sm:p-4 bg-card dark:bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-md transition-all duration-200"
-          >
-            {brand.logo_url ? (
-              <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+      {/* Marquee */}
+      <div className="overflow-hidden relative">
+        {/* Fade edges */}
+        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-12 z-10 bg-gradient-to-r from-background to-transparent" />
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 z-10 bg-gradient-to-l from-background to-transparent" />
+
+        <div className="brands-track flex gap-3 w-max">
+          {track.map((brand, idx) => (
+            <Link
+              key={`${brand.id}-${idx}`}
+              to={`/produtos?brand=${brand.slug}`}
+              className="group flex-shrink-0 flex flex-col items-center justify-center gap-2 px-5 py-3 bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-md transition-all duration-200 min-w-[100px]"
+            >
+              {brand.logo_url ? (
                 <img
                   src={brand.logo_url}
                   alt={brand.name}
-                  className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-200"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = 'none';
-                    const span = document.createElement('span');
-                    span.className = 'text-xs font-bold text-muted-foreground';
-                    span.textContent = brand.name;
-                    e.currentTarget.parentElement?.appendChild(span);
-                  }}
+                  className="h-8 w-auto max-w-[72px] object-contain group-hover:scale-110 transition-transform duration-200"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                 />
-              </div>
-            ) : (
-              <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
-                <span className="text-xs sm:text-sm font-black text-foreground/70 group-hover:text-primary transition-colors text-center leading-tight">
+              ) : (
+                <span className="text-sm font-black text-foreground/70 group-hover:text-primary transition-colors text-center leading-tight">
                   {brand.name}
                 </span>
-              </div>
-            )}
-            <span className="text-[10px] sm:text-xs text-muted-foreground font-medium group-hover:text-primary transition-colors truncate w-full text-center">
-              {brand.name}
-            </span>
-          </Link>
-        ))}
+              )}
+              <span className="text-[10px] text-muted-foreground font-medium group-hover:text-primary transition-colors">
+                {brand.name}
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
 
-      {/* Mobile "ver todas" */}
+      {/* Mobile link */}
       <div className="mt-4 sm:hidden">
         <Link
           to="/produtos"
