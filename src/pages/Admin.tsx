@@ -15,20 +15,22 @@ import { AdminPartners } from '@/components/admin/AdminPartners';
 import { AdminSupport } from '@/components/admin/AdminSupport';
 import { AdminCoupons } from '@/components/admin/AdminCoupons';
 import { AdminPromoBanners } from '@/components/admin/AdminPromoBanners';
+import { AdminCuration } from '@/components/admin/AdminCuration';
 import { ResellerProducts } from '@/components/admin/ResellerProducts';
 import { ResellerOrders } from '@/components/admin/ResellerOrders';
+import { ResellerDashboard } from '@/components/admin/ResellerDashboard';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Newspaper, Tags,
   Award, Image as ImageIcon, Video, Handshake, Menu, X, ChevronRight,
-  LogOut, Settings, Bell, Wrench, Store, Tag, Megaphone,
+  LogOut, Settings, Bell, Wrench, Store, Tag, Megaphone, ClipboardCheck,
 } from 'lucide-react';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type AdminSection =
   | 'dashboard' | 'orders' | 'products' | 'categories' | 'brands'
-  | 'banners' | 'promobanners' | 'videos' | 'news' | 'users' | 'partners' | 'support' | 'coupons';
+  | 'banners' | 'promobanners' | 'videos' | 'news' | 'users' | 'partners' | 'support' | 'coupons' | 'curation';
 
-type ResellerSection = 'products' | 'orders';
+type ResellerSection = 'dashboard' | 'products' | 'orders';
 
 interface NavItem {
   id: AdminSection;
@@ -50,13 +52,15 @@ const ADMIN_NAV: NavItem[] = [
   { id: 'news',       label: 'Notícias',        icon: Newspaper },
   { id: 'users',      label: 'Utilizadores',    icon: Users },
   { id: 'partners',   label: 'Parceiros',       icon: Handshake },
+  { id: 'curation',   label: 'Curadoria',       icon: ClipboardCheck },
   { id: 'support',    label: 'Suporte',         icon: Wrench },
   { id: 'coupons',    label: 'Cupões',          icon: Tag },
 ];
 
 const RESELLER_NAV = [
-  { id: 'products' as ResellerSection, label: 'Meus Produtos', icon: Package },
-  { id: 'orders' as ResellerSection,   label: 'Pedidos',       icon: ShoppingCart },
+  { id: 'dashboard' as ResellerSection, label: 'Dashboard',     icon: LayoutDashboard },
+  { id: 'products' as ResellerSection,  label: 'Meus Produtos', icon: Package },
+  { id: 'orders' as ResellerSection,    label: 'Pedidos',       icon: ShoppingCart },
 ];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -73,11 +77,11 @@ function SectionTitle({ title, desc }: { title: string; desc: string }) {
 export default function Admin() {
   const { user, isAdmin, isReseller, signOut, loading: authLoading } = useAuth();
   const [adminSection, setAdminSection] = useState<AdminSection>('dashboard');
-  const [resellerSection, setResellerSection] = useState<ResellerSection>('products');
+  const [resellerSection, setResellerSection] = useState<ResellerSection>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pendingPartners, setPendingPartners] = useState(0);
+  const [pendingCuration, setPendingCuration] = useState(0);
 
-  // Load pending partner count for badge
   useEffect(() => {
     if (!isAdmin) return;
     (supabase as any)
@@ -85,6 +89,11 @@ export default function Admin() {
       .select('id', { count: 'exact' })
       .eq('status', 'pending')
       .then(({ count }: { count: number | null }) => setPendingPartners(count || 0));
+    (supabase as any)
+      .from('products')
+      .select('id', { count: 'exact' })
+      .eq('status', 'pending')
+      .then(({ count }: { count: number | null }) => setPendingCuration(count || 0));
   }, [isAdmin]);
 
   if (authLoading) {
@@ -97,14 +106,17 @@ export default function Admin() {
 
   if (!user || (!isAdmin && !isReseller)) return <Navigate to="/auth" replace />;
 
-  const navItems: NavItem[] = ADMIN_NAV.map(item =>
-    item.id === 'partners' ? { ...item, badge: pendingPartners || undefined } : item
-  );
+  const navItems: NavItem[] = ADMIN_NAV.map(item => {
+    if (item.id === 'partners') return { ...item, badge: pendingPartners || undefined };
+    if (item.id === 'curation') return { ...item, badge: pendingCuration || undefined };
+    return item;
+  });
 
   const goTo = (id: AdminSection) => {
     setAdminSection(id);
     setSidebarOpen(false);
     if (id === 'partners') setPendingPartners(0);
+    if (id === 'curation') setPendingCuration(0);
   };
 
   // ── Sidebar component ─────────────────────────────────────────────────────
@@ -203,6 +215,7 @@ export default function Admin() {
       case 'news':       return <><SectionTitle title="Notícias & Tendências" desc="Artigos e conteúdo editorial" /><AdminNewsTrends /></>;
       case 'users':      return <><SectionTitle title="Utilizadores" desc="Gerir contas, roles e permissões" /><AdminUsers /></>;
       case 'partners':   return <AdminPartners />;
+      case 'curation':   return <><SectionTitle title="Curadoria de Parceiros" desc="Aprovar ou rejeitar produtos submetidos pelos parceiros" /><AdminCuration /></>;
       case 'support':    return <><SectionTitle title="Suporte Técnico" desc="Gerir pedidos de assistência técnica" /><AdminSupport /></>;
       case 'coupons':    return <><SectionTitle title="Cupões" desc="Criar e gerir cupões de desconto" /><AdminCoupons /></>;
       default:           return null;
@@ -270,11 +283,15 @@ export default function Admin() {
         <main className="flex-1 p-4 sm:p-6">
           {isAdmin ? renderAdminContent() : (
             <>
-              <SectionTitle
-                title={resellerSection === 'products' ? 'Meus Produtos' : 'Pedidos'}
-                desc={resellerSection === 'products' ? 'Gerir o seu catálogo de produtos' : 'Acompanhar os seus pedidos'}
-              />
-              {resellerSection === 'products' ? <ResellerProducts /> : <ResellerOrders />}
+              {resellerSection === 'dashboard' && (
+                <><SectionTitle title="Dashboard" desc="Visão geral das suas vendas e desempenho" /><ResellerDashboard /></>
+              )}
+              {resellerSection === 'products' && (
+                <><SectionTitle title="Meus Produtos" desc="Gerir o seu catálogo de produtos" /><ResellerProducts /></>
+              )}
+              {resellerSection === 'orders' && (
+                <><SectionTitle title="Pedidos" desc="Acompanhar e rastrear as suas encomendas" /><ResellerOrders /></>
+              )}
             </>
           )}
         </main>

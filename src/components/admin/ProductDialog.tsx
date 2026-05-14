@@ -115,7 +115,10 @@ export function ProductDialog({ open, onOpenChange, product, onSuccess, isResell
         is_trending: formData.is_trending,
       };
 
-      if (isReseller && !product && user) productData.seller_id = user.id;
+      if (isReseller && !product && user) {
+        productData.seller_id = user.id;
+        productData.status = 'pending';
+      }
 
       let error;
       if (product) {

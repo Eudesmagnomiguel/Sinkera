@@ -22,6 +22,8 @@ export interface Product {
   stock_quantity?: number;
   specifications?: Record<string, any>;
   created_at?: string;
+  status?: 'pending' | 'approved' | 'rejected';
+  seller_id?: string;
 }
 
 export function useProducts() {
@@ -39,6 +41,7 @@ export function useProducts() {
       const { data, error } = await supabase
         .from('products')
         .select('*')
+        .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
       if (error) {
