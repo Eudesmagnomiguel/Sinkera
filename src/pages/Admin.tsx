@@ -16,19 +16,20 @@ import { AdminSupport } from '@/components/admin/AdminSupport';
 import { AdminCoupons } from '@/components/admin/AdminCoupons';
 import { AdminPromoBanners } from '@/components/admin/AdminPromoBanners';
 import { AdminCuration } from '@/components/admin/AdminCuration';
+import { AdminNotifications } from '@/components/admin/AdminNotifications';
 import { ResellerProducts } from '@/components/admin/ResellerProducts';
 import { ResellerOrders } from '@/components/admin/ResellerOrders';
 import { ResellerDashboard } from '@/components/admin/ResellerDashboard';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Newspaper, Tags,
   Award, Image as ImageIcon, Video, Handshake, Menu, X, ChevronRight,
-  LogOut, Settings, Bell, Wrench, Store, Tag, Megaphone, ClipboardCheck,
+  LogOut, Settings, Bell, Wrench, Store, Tag, Megaphone, ClipboardCheck, Send,
 } from 'lucide-react';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type AdminSection =
   | 'dashboard' | 'orders' | 'products' | 'categories' | 'brands'
-  | 'banners' | 'promobanners' | 'videos' | 'news' | 'users' | 'partners' | 'support' | 'coupons' | 'curation';
+  | 'banners' | 'promobanners' | 'videos' | 'news' | 'users' | 'partners' | 'support' | 'coupons' | 'curation' | 'notifications';
 
 type ResellerSection = 'dashboard' | 'products' | 'orders';
 
@@ -52,8 +53,9 @@ const ADMIN_NAV: NavItem[] = [
   { id: 'news',       label: 'Notícias',        icon: Newspaper },
   { id: 'users',      label: 'Utilizadores',    icon: Users },
   { id: 'partners',   label: 'Parceiros',       icon: Handshake },
-  { id: 'curation',   label: 'Curadoria',       icon: ClipboardCheck },
-  { id: 'support',    label: 'Suporte',         icon: Wrench },
+  { id: 'curation',       label: 'Curadoria',       icon: ClipboardCheck },
+  { id: 'notifications',  label: 'Notificações',    icon: Send },
+  { id: 'support',        label: 'Suporte',         icon: Wrench },
   { id: 'coupons',    label: 'Cupões',          icon: Tag },
 ];
 
@@ -215,7 +217,8 @@ export default function Admin() {
       case 'news':       return <><SectionTitle title="Notícias & Tendências" desc="Artigos e conteúdo editorial" /><AdminNewsTrends /></>;
       case 'users':      return <><SectionTitle title="Utilizadores" desc="Gerir contas, roles e permissões" /><AdminUsers /></>;
       case 'partners':   return <AdminPartners />;
-      case 'curation':   return <><SectionTitle title="Curadoria de Parceiros" desc="Aprovar ou rejeitar produtos submetidos pelos parceiros" /><AdminCuration /></>;
+      case 'curation':       return <><SectionTitle title="Curadoria de Parceiros" desc="Aprovar ou rejeitar produtos submetidos pelos parceiros" /><AdminCuration /></>;
+      case 'notifications':  return <><SectionTitle title="Notificações" desc="Enviar notificações in-app para clientes e parceiros" /><AdminNotifications /></>;
       case 'support':    return <><SectionTitle title="Suporte Técnico" desc="Gerir pedidos de assistência técnica" /><AdminSupport /></>;
       case 'coupons':    return <><SectionTitle title="Cupões" desc="Criar e gerir cupões de desconto" /><AdminCoupons /></>;
       default:           return null;

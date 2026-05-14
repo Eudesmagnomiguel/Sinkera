@@ -300,13 +300,13 @@ const Products = () => {
                   Stock limitado — aproveita enquanto há
                 </p>
                 <div className="inline-flex w-fit">
-                  <Link
-                    to="/produtos?category=promocoes"
+                  <button
+                    onClick={() => document.getElementById('produtos-grid')?.scrollIntoView({ behavior: 'smooth' })}
                     className="flex items-center gap-2 bg-orange-500 hover:bg-orange-400 transition-colors text-white text-[11px] font-black uppercase tracking-[0.15em] px-5 py-2.5 rounded-sm"
                   >
                     Ver todas as ofertas
-                    <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1 duration-200"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  </Link>
+                    <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </button>
                 </div>
               </div>
 
@@ -327,7 +327,7 @@ const Products = () => {
           </aside>
 
           {/* Grid */}
-          <main className="flex-1 min-w-0">
+          <main id="produtos-grid" className="flex-1 min-w-0">
             <ProductGrid products={sortedProducts} viewMode={viewMode} />
           </main>
         </div>

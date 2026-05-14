@@ -464,11 +464,6 @@ export default function Checkout() {
                     ))}
                   </div>
 
-                  {/* Security note */}
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 rounded-xl px-3 py-2.5">
-                    <Lock className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span>Os seus dados estão protegidos por encriptação SSL de 256 bits.</span>
-                  </div>
                 </div>
 
                 {/* Delivery summary */}
@@ -573,7 +568,7 @@ export default function Checkout() {
                   )}
                   <Button
                     variant="outline"
-                    className="w-full gap-2 rounded-xl text-sm"
+                    className="w-full gap-2 rounded-xl text-sm border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/40 font-semibold"
                     onClick={() => printProformaInvoice({
                       items: cartItems.map(i => ({
                         name: i.product.name,

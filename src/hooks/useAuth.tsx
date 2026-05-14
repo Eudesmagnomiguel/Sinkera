@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { sendWelcomeNotification } from '@/lib/notifications';
 
 interface AuthContextType {
   user: User | null;
@@ -30,12 +31,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
-        // Check roles
+
         if (session?.user) {
           setTimeout(() => {
             checkUserRoles(session.user.id);
           }, 0);
+          // Welcome notification on first sign-up
+          if (event === 'SIGNED_IN') {
+            setTimeout(() => sendWelcomeNotification(session.user.id), 1500);
+          }
         } else {
           setIsAdmin(false);
           setIsReseller(false);
