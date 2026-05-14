@@ -149,13 +149,10 @@ export const Footer = () => {
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   <div className="bg-white rounded px-2 py-1">
-                    <img src={paymentMulticaixa} alt="Multicaixa" className="h-5 w-auto" />
+                    <img src={paymentMulticaixa} alt="Multicaixa Express" className="h-5 w-auto" />
                   </div>
                   <div className="bg-white rounded px-2 py-1">
-                    <img src={paymentVisaMastercard} alt="Visa/Mastercard" className="h-5 w-auto" />
-                  </div>
-                  <div className="bg-white rounded px-2 py-1">
-                    <img src={paymentBankTransfer} alt="Transferência" className="h-5 w-auto" />
+                    <img src={paymentBankTransfer} alt="Transferência Bancária" className="h-5 w-auto" />
                   </div>
                 </div>
               </div>
