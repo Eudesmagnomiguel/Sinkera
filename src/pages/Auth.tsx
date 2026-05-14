@@ -220,7 +220,8 @@ export default function Auth() {
             <img
               src={sinkeraLogoWhite}
               alt="Sinkera"
-              className="h-10 w-auto invert dark:invert-0 dark:opacity-85"
+              className="h-10 w-auto"
+              style={{ filter: 'brightness(0) saturate(100%) invert(38%) sepia(93%) saturate(763%) hue-rotate(195deg) brightness(101%) contrast(101%)' }}
             />
             <div className="space-y-1.5">
               <h2 className="text-2xl font-black text-foreground tracking-tight">
