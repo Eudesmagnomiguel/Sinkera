@@ -5,6 +5,7 @@ export interface Brand {
   id: string;
   name: string;
   slug: string;
+  logo_url: string | null;
   count: number;
 }
 
@@ -21,7 +22,7 @@ export function useBrands() {
       // Load all brands
       const { data: brandsData, error: brandsError } = await supabase
         .from('brands')
-        .select('id, name, slug');
+        .select('id, name, slug, logo_url');
 
       if (brandsError) throw brandsError;
 

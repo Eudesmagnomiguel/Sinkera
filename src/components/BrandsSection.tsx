@@ -22,6 +22,55 @@ const FALLBACK: Brand[] = [
   { id: '8', name: 'Huawei',  slug: 'huawei',  logo_url: null },
 ];
 
+const SLUG_TO_DOMAIN: Record<string, string> = {
+  'apple': 'apple.com',
+  'samsung': 'samsung.com',
+  'sony': 'sony.com',
+  'lg': 'lg.com',
+  'huawei': 'huawei.com',
+  'xiaomi': 'mi.com',
+  'mi': 'mi.com',
+  'dell': 'dell.com',
+  'hp': 'hp.com',
+  'lenovo': 'lenovo.com',
+  'asus': 'asus.com',
+  'acer': 'acer.com',
+  'microsoft': 'microsoft.com',
+  'google': 'google.com',
+  'canon': 'canon.com',
+  'philips': 'philips.com',
+  'panasonic': 'panasonic.com',
+  'jbl': 'jbl.com',
+  'bose': 'bose.com',
+  'nintendo': 'nintendo.com',
+  'playstation': 'playstation.com',
+  'xbox': 'xbox.com',
+  'oppo': 'oppo.com',
+  'oneplus': 'oneplus.com',
+  'realme': 'realme.com',
+  'tecno': 'tecno-mobile.com',
+  'infinix': 'infinixmobility.com',
+  'itel': 'itel-mobile.com',
+  'toshiba': 'toshiba.com',
+  'hisense': 'hisense.com',
+  'tcl': 'tcl.com',
+  'haier': 'haier.com',
+  'epson': 'epson.com',
+  'logitech': 'logitech.com',
+  'intel': 'intel.com',
+  'amd': 'amd.com',
+  'nvidia': 'nvidia.com',
+  'anker': 'anker.com',
+  'tp-link': 'tp-link.com',
+  'tplink': 'tp-link.com',
+};
+
+function getBrandLogo(brand: Brand): string | null {
+  if (brand.logo_url) return brand.logo_url;
+  const domain = SLUG_TO_DOMAIN[brand.slug.toLowerCase()];
+  return domain ? `https://logo.clearbit.com/${domain}` : null;
+}
+
 export const BrandsSection = () => {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,8 +81,7 @@ export const BrandsSection = () => {
       .select('id, name, slug, logo_url, is_featured')
       .order('name')
       .then(({ data }: { data: Brand[] | null }) => {
-        const list = data && data.length > 0 ? data : FALLBACK;
-        setBrands(list.filter((b) => b.is_featured !== false));
+        setBrands(data && data.length > 0 ? data : FALLBACK);
         setLoading(false);
       });
   }, []);
@@ -98,18 +146,25 @@ export const BrandsSection = () => {
               to={`/produtos?brand=${brand.slug}`}
               className="group flex-shrink-0 flex flex-col items-center justify-center gap-2 px-5 py-3 bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-md transition-all duration-200 min-w-[100px]"
             >
-              {brand.logo_url ? (
+              {getBrandLogo(brand) ? (
                 <img
-                  src={brand.logo_url}
+                  src={getBrandLogo(brand)!}
                   alt={brand.name}
                   className="h-8 w-auto max-w-[72px] object-contain group-hover:scale-110 transition-transform duration-200"
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                  onError={(e) => {
+                    const img = e.currentTarget as HTMLImageElement;
+                    img.style.display = 'none';
+                    const span = img.nextElementSibling as HTMLElement;
+                    if (span) span.style.display = 'block';
+                  }}
                 />
-              ) : (
-                <span className="text-sm font-black text-foreground/70 group-hover:text-primary transition-colors text-center leading-tight">
-                  {brand.name}
-                </span>
-              )}
+              ) : null}
+              <span
+                className="text-sm font-black text-foreground/70 group-hover:text-primary transition-colors text-center leading-tight"
+                style={{ display: getBrandLogo(brand) ? 'none' : 'block' }}
+              >
+                {brand.name}
+              </span>
               <span className="text-[10px] text-muted-foreground font-medium group-hover:text-primary transition-colors">
                 {brand.name}
               </span>

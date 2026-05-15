@@ -122,7 +122,7 @@ const Index = () => {
           eyebrow="Áudio · Performance"
           title="Som que se sente. Design que impressiona."
           description="Headphones e colunas com acústica de estúdio, cancelamento ativo e bateria de longa duração — feitos para quem leva o som a sério."
-          ctaLabel="Ver áudio premium"
+          ctaLabel="Áudio Premium"
           ctaHref="/produtos?category=headphones"
           image="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=900&h=900&fit=crop"
           accent="cyan"
